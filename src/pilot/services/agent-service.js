@@ -34,6 +34,15 @@ module.exports = class AgentService{
       return agent;
 }
 
+static async getOrder(ref) {
+
+     
+  var order = await Order.findOne({refno: ref});
+  
+  
+  return order;
+}
+
 
 static create(cust) {
 

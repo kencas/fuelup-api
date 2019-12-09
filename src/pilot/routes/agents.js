@@ -89,6 +89,23 @@ router.get('/:id', async(req, res, next) => {
 });
 
 
+router.get('/getsingleorder', async(req, res, next) => {
+
+    const id = req.query.refno;
+
+    try
+    {
+        let order = await agentService.getOrder(id);
+       
+        res.status(200).json(order);
+    }
+    catch (err) 
+      {
+        return res.status(500).send(err);
+      }
+});
+
+
 
 router.patch('/',(req, res, next) => {
 
