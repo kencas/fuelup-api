@@ -252,7 +252,7 @@ module.exports = class CustomerService{
             var o = await order.save();
 
             response.flag = false;
-            response.message = 'Order with reference no created successfully';
+            response.message = 'Order with reference no ' + refno + ' created successfully';
             response.payload = {
                 refno: refno
             };
