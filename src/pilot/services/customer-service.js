@@ -77,7 +77,7 @@ module.exports = class CustomerService{
         
         const funding = new Fund({
             amount: cust.amount,
-            reference: this.getRandomInt(1000, 9999 ) + Math.floor(Date.now() / 1000),
+            reference: this.getRandomInt(1000, 9999 ) + "" + Math.floor(Date.now() / 1000),
             phoneno: cust.phoneno
         });
 
