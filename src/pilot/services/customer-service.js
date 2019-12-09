@@ -346,7 +346,7 @@ module.exports = class CustomerService{
 
         var SECRET_KEY = 'sk_test_57f4d416f35162f07d67679b57d8536031e7fe08';
 
-        headers = {
+        var headers = {
             Authorization: 'Bearer ' . SECRET_KEY
         };
         
