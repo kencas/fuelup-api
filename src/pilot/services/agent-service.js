@@ -42,7 +42,7 @@ static async getOrder(ref) {
     payload: {}
 };
 
-  var order = await Order.findOne({refno: ref});
+  var order = await Order.findOne({refno: ref}).populate('customer');
 
   if(order != null)
         {
@@ -51,7 +51,7 @@ static async getOrder(ref) {
             response.payload = {
                 refno: order.refno,
                 qty: order.qty,
-                customer : customer
+                customer : order.customer
             }
         }
         
