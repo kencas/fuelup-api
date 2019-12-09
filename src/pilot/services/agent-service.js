@@ -42,7 +42,7 @@ static async getOrder(ref) {
     payload: {}
 };
 
-  var order = await Order.findOne({refno: ref}).populate('customer');
+  var order = await Order.findOne({refno: ref});
 
   if(order != null)
         {
