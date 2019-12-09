@@ -72,21 +72,21 @@ router.post('/fund',(req, res, next) => {
 
 
 
-router.get('/:id', async(req, res, next) => {
+// router.get('/:id', async(req, res, next) => {
 
-    const id = req.params.id;
+//     const id = req.params.id;
 
-    try
-    {
-        let agent = await agentService.get(id);
+//     try
+//     {
+//         let agent = await agentService.get(id);
        
-        res.status(200).json(agent);
-    }
-    catch (err) 
-      {
-        return res.status(500).send(err);
-      }
-});
+//         res.status(200).json(agent);
+//     }
+//     catch (err) 
+//       {
+//         return res.status(500).send(err);
+//       }
+// });
 
 
 router.get('/getsingleorder', async(req, res, next) => {
