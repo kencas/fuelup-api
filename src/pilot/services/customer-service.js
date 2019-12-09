@@ -351,7 +351,7 @@ module.exports = class CustomerService{
         };
         
 
-        axios.get('https://api.paystack.co/transaction/verify/' + cust.refno, { headers: headers })
+        axios.get('https://api.paystack.co/transaction/verify/' + cust.reference, { headers: headers })
         .then(async(response) => {
             var result = response.data;
             if(result.flag)
