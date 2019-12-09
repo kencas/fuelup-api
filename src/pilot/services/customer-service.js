@@ -368,11 +368,11 @@ module.exports = class CustomerService{
         //   reject(error);
         // });
 
-        paystack.transaction.verify({reference: cust.reference})
+        paystack.transaction.verify(cust.reference)
         .then(async function(body) {
             console.log(body);
                 if(body.flag){
-                    var customer = await this.fundWallet(cust.phoneno, (result.data.amount / 100), cust.reference);
+                    var customer = await this.fundWallet(cust.phoneno, (body.data.amount / 100), cust.reference);
                     resolve(customer);
                 }
                 
