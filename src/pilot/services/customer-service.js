@@ -93,7 +93,7 @@ module.exports = class CustomerService{
                 phoneno: cust.phoneno
             };
 
-            console.log(response);
+            //console.log(response);
     
                 resolve(response);
 
