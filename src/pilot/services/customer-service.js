@@ -8,7 +8,7 @@ const Ledger  = require('../model/ledger');
 const Channel  = require('../model/channel');
 const Agent  = require('../model/agent');
 const Withdrawal = require('../model/withdrawal');
-const Application = require('../model/application');
+const Wallet = require('../model/wallet');
 const Verification = require('../model/verification');
 
 module.exports = class CustomerService{ 
