@@ -87,6 +87,8 @@ module.exports = class CustomerService{
             response.flag = true;
             response.message = 'Funding initialized successfully';
             response.payload = fund;
+
+            console.log(response);
     
                 resolve(response);
 
