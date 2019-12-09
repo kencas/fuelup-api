@@ -330,7 +330,7 @@ module.exports = class CustomerService{
  
     }
 
-    static verifyTransaction(cust) {
+    static verifytransaction(cust) {
 
         var response = {
             flag: false,
