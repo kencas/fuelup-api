@@ -148,7 +148,7 @@ module.exports = class CustomerService{
             else
                 accno = parseInt(lastRecord.accno.substr(3)) + 1;
 
-            accno = this.zeroPad(accno,3);
+            accno = this.zeroPad(accno,7);
 
             accno = code + accno;
 
