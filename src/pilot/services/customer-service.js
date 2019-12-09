@@ -74,10 +74,11 @@ module.exports = class CustomerService{
 
         return new Promise(async(resolve, reject) => {
 
+            var reference = this.getRandomInt(1000, 9999 ) + "" + Math.floor(Date.now() / 1000);
         
         const funding = new Fund({
             amount: cust.amount,
-            reference: this.getRandomInt(1000, 9999 ) + "" + Math.floor(Date.now() / 1000),
+            reference: reference,
             phoneno: cust.phoneno
         });
 
@@ -86,7 +87,11 @@ module.exports = class CustomerService{
 
             response.flag = true;
             response.message = 'Funding initialized successfully';
-            response.payload = fund;
+            response.payload = {
+                amount: cust.amount,
+                reference: reference,
+                phoneno: cust.phoneno
+            };
 
             console.log(response);
     
