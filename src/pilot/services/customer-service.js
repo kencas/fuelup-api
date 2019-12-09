@@ -11,6 +11,8 @@ const Withdrawal = require('../model/withdrawal');
 const Wallet = require('../model/wallet');
 const Verification = require('../model/verification');
 
+const axios = require('axios');
+
 module.exports = class CustomerService{ 
     
     constructor() {
@@ -61,6 +63,39 @@ module.exports = class CustomerService{
  
     }
 
+
+    static async initfunding(cust) {
+
+        var response = {
+            flag: false,
+            message: 'Error funding',
+            payload: null
+        };
+
+        return new Promise(async(resolve, reject) => {
+
+        
+        const funding = new Fund({
+            amount: cust.amount,
+            reference: this.getRandomInt(1000, 9999 ) + Math.floor(Date.now() / 1000),
+            phoneno: cust.phoneno
+        });
+
+        
+            var fund = await funding.save();        
+
+            response.flag = true;
+            response.message = 'Funding initialized successfully';
+            response.payload = fund;
+    
+                resolve(response);
+
+            });
+ 
+    }
+
+
+
     static async verifyOTP(cust) {
 
         var response = {
@@ -85,9 +120,32 @@ module.exports = class CustomerService{
             
             var v = await verification.save();
 
+            var c = await Customer.findOne({phoneno: cust.phoneno});
+
+            var isnewuser = true;
+            var isconfiguredcode = 'N';
+            var cst = {};
+
+            if(c != null)
+            {
+                isnewuser = false;
+                isconfiguredcode = c.isconfiguredcode;
+                cst = {
+                    username: c.username,
+                    customerNo: c.customerNo,
+                    phoneno: c.phoneno,
+                    isconfiguredcode : c.isconfiguredcode,
+                    email: c.email,
+                    code: cust.code
+                };
+            }
+
             response.flag = true;
             response.message = 'Phone No verified successfully';
-            response.payload = v;
+            response.payload = {
+                isnewuser : isnewuser,
+                cst: cst
+            };
     
             resolve(response);
         });
@@ -167,10 +225,13 @@ module.exports = class CustomerService{
            
             var a = await account.save();
 
+            var customerno = this.getRandomInt(10000000001,11111111111);
+
             const customer = new Customer({
                 username: cust.username,
                 email: cust.email,
-                phoneno: cust.phoneno
+                phoneno: cust.phoneno,
+                customerNo: customerno
             });
             
             var c = await customer.save();
@@ -262,7 +323,7 @@ module.exports = class CustomerService{
  
     }
 
-    static applyLoan(cust) {
+    static verifyTransaction(cust) {
 
         var response = {
             flag: false,
@@ -281,23 +342,25 @@ module.exports = class CustomerService{
         });
 
 
+        var SECRET_KEY = 'sk_test_57f4d416f35162f07d67679b57d8536031e7fe08';
+
+        headers = {
+            Authorization: 'Bearer ' . SECRET_KEY
+        };
         
 
-     application
-    .save()
-    .then(async(result) => {
-        console.log(result);
-        response.flag = true;
-        response.message = 'Loan Application logged successfully';
-        response.payload = result;
-
-        
-        resolve(response);
-    })
-    .catch(err => {
-        console.log(err)
-        reject(error);
-    });
+        axios.get('https://api.paystack.co/transaction/verify/' + cust.refno, { headers: headers })
+        .then(async(response) => {
+            var result = response.data;
+            if(result.flag)
+            var customer = await this.fundWallet(cust.phoneno, cust.amount);
+            
+          console.log(result);
+          res.status(200).json(result);
+        }, (error) => {
+          console.log(error);
+          res.status(500).json(err);
+        });
             
 
       

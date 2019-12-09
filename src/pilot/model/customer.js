@@ -12,7 +12,8 @@ var CustomerSchema = new Schema(
         gender : {type: String, required: true, default: 'NA'},
         email  : {type: String, required: true, default: 'NA'},
         phoneno  : {type: String, required: true, default: 'NA'},
-        transCode : {type: String, required: true, default: 'NA'},
+        transcode : {type: String, required: true, default: 'NA'},
+        isconfiguredcode : {type: String, required: true, default: 'N'},
         created : {type: Date, default: Date.now}
     }
 );
