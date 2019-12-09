@@ -141,7 +141,7 @@ module.exports = class CustomerService{
             }
 
             response.flag = true;
-            response.message = 'Phone No verified successfully';
+            response.message = 'Phone Number verified successfully';
             response.payload = {
                 isnewuser : isnewuser,
                 cst: cst
