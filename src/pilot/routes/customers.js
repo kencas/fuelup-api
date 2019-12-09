@@ -85,6 +85,22 @@ router.post('/initfunding',(req, res, next) => {
 
 });
 
+router.post('/verifytransaction',(req, res, next) => {
+
+    
+    customerService.verifytransaction(req.body)
+    .then(result => {
+        console.log(result),
+        res.status(200).json(result);
+    })
+    .catch(err => {
+            
+         console.log(err),
+        res.status(500).json(err);
+    });
+
+});
+
 
 
 router.get('/transactions',async(req, res, next) => {

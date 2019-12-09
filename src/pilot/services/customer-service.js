@@ -334,12 +334,7 @@ module.exports = class CustomerService{
         
 
       return new Promise(async(resolve, reject) => {
-        const application = new Application({
-            bvn: cust.bvn,
-            amount: cust.amount,
-            duration: cust.duration,
-            phoneno: cust.phoneno
-        });
+        
 
 
         var SECRET_KEY = 'sk_test_57f4d416f35162f07d67679b57d8536031e7fe08';
@@ -353,13 +348,13 @@ module.exports = class CustomerService{
         .then(async(response) => {
             var result = response.data;
             if(result.flag)
-            var customer = await this.fundWallet(cust.phoneno, cust.amount);
+            var customer = await this.fundWallet(cust.phoneno, (result.data.amount / 100), cust.reference);
             
           console.log(result);
-          res.status(200).json(result);
+          resolve(customer);
         }, (error) => {
           console.log(error);
-          res.status(500).json(err);
+          reject(error);
         });
             
 
@@ -367,97 +362,8 @@ module.exports = class CustomerService{
       });
     }
 
-    static async createUSSDAccount(cust) {
 
-        var isNewCustomer = false;
-        var isNewAccount = false;
-        var accno = '';
-
-        var response = {
-            flag: false,
-            message: 'Error signing up',
-            payload: null
-        };
-
-        
-
-      
-        const customer = new Customer({
-            firstname: cust.firstname,
-            surname: cust.surname,
-            othername: cust.othername,
-            phoneno: cust.phoneno
-        });
-
-        var acctype = await AccType.findOne({index: cust.acctype});
-
-        if(acctype == null)
-        {
-            response.message = 'Invalid selection';
-            return response;
-        }
-
-
-        var c = await Customer.findOne({phoneno: cust.phoneno});
-
-        if(c == null)
-        {
-            isNewCustomer = true;
-        }
-
-        if(isNewCustomer)
-        {
-            c = await customer.save();
-        }
-
-        var a = await Account.findOne({acctype: acctype._id, customer: c._id});
-        console.log(a);
-        if(a == null)
-        {
-            isNewAccount = true;
-        }
-
-        var lastRecord = await Account.findOne({acctype: acctype._id}).sort({ created: -1 }).limit(1);
-
-        if(lastRecord == null)
-            accno = 1;
-        else
-            accno = parseInt(lastRecord.accno.substr(5)) + 1;
-
-        accno = this.zeroPad(accno,5);
-
-        accno = acctype.code + "01" + accno;
-    
-
-        if(isNewAccount)
-        {
-            const account = new Account({
-                accname: cust.firstname + " " + cust.surname + " " + cust.othername,
-                accno: accno,
-                acctype: acctype._id,
-                customer: c._id
-            });
-            a = await account.save();
-            response.flag = true;
-            response.message = 'Customer created successfully';
-            response.payload = a;
-
-            console.log(response);
-            
-        }
-        else
-        {
-            response.flag = false;
-            response.message = 'Account already created!!';
-        }
-
-        return response;
- 
-    }
-
-    
-
-    static async createOPAccount(cust) {
+    static async fundwallet(phoneno, amount, refno) {
 
         
         var isNewAccount = false;
@@ -472,49 +378,30 @@ module.exports = class CustomerService{
 
      
     
-        var c = await Customer.findOne({phoneno: cust.phoneno});
+        var c = await Fund.findOne({phoneno: phoneno, refno: refno, status: "Pending"});
 
         if(c == null)
         {
-            isNewCustomer = true;
+            response.message = "Invalid transaction";
+
+            return response;
         }
 
+            c.status = "Processed";
+       
+            await c.save();
 
-        var a = await Account.findOne({acctype: cust.acctype, customer: c._id});
+            var cd = await Customer.findOne({phoneno: phoneno});
 
-        if(a == null)
-        {
-            isNewAccount = true;
+            var wallet = await Wallet.findOne({customer: cd._id});
 
-            var accno = parseInt(lastRecord.accno.substr(5)) + 1;
+            wallet.amount += amount;
 
-            accno = acctype.code + "01" + accno;
-        }
-
-        
-
-        if(isNewAccount)
-        {
-            const account = new Account({
-                accname: cust.firstname + " " + cust.surname + " " + cust.othername,
-                accno: accno,
-                acctype: cust.acctype,
-                customer: c._id
-            });
-            a = await account.save();
-            response.flag = true;
-            response.message = 'OP Account created successfully';
-            response.payload = a;
-
-            console.log(response);
-        }
-        else
-        {
-            response.flag = false;
-            response.message = 'Account already created!!';
-
+            wallet.save();
             
-        }
+            response.flag = true;
+            response.message = "Transaction completed successfully";
+            response.payload = c;
 
             return response;
 
