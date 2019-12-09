@@ -1,0 +1,26 @@
+{
+  "name": "api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "clean": "rm -rf build && mkdir build",
+    "dev": "nodemon src/server.js --exec babel-node",
+    "build": "npm run clean",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon ./src/server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "express": "^4.16.3",
+    "mongoose": "^5.2.5",
+    "mongoose-update-if-current": "^1.0.3",
+    "morgan": "^1.9.0",
+    "nodemon": "^1.18.3",
+    "promise-mysql": "^3.3.1",
+    "socket.io": "^2.1.1"
+  }
+}

@@ -1,0 +1,844 @@
+const Customer = require('../model/customer');
+const Account  = require('../model/account');
+const AccType  = require('../model/acctype');
+const Posting  = require('../model/posting');
+const Transaction  = require('../model/transaction');
+const Code  = require('../model/code');
+const Ledger  = require('../model/ledger');
+const Channel  = require('../model/channel');
+const Agent  = require('../model/agent');
+const Withdrawal = require('../model/withdrawal');
+const Application = require('../model/application');
+const Verification = require('../model/verification');
+
+module.exports = class CustomerService{ 
+    
+    constructor() {
+      
+    }
+
+    static zeroPad(num, places) {
+        var zero = places - num.toString().length + 1;
+        return Array(+(zero > 0 && zero)).join("0") + num;
+      }
+
+
+    static async get(id) {
+
+        var customer = await Customer.findById(id);
+
+        customer.accounts = await Account.find({customer: id}).populate('acctype');
+        return customer;
+      
+    }
+
+    static async initverification(cust) {
+
+        var response = {
+            flag: false,
+            message: 'Error Verification',
+            payload: null
+        };
+
+        return new Promise(async(resolve, reject) => {
+
+        
+        const verification = new Verification({
+            code: this.getRandomInt(1000, 9999 ),
+            phoneno: cust.phoneno
+        });
+
+        
+            var v = await verification.save();        
+
+            response.flag = true;
+            response.message = 'Verification code sent successfully';
+            response.payload = v;
+    
+                resolve(response);
+
+            });
+ 
+    }
+
+    static async verifyOTP(cust) {
+
+        var response = {
+            flag: false,
+            message: 'Error Verification',
+            payload: null
+        };
+
+        return new Promise(async(resolve, reject) => {
+        
+            var verification = await Verification.findOne({phoneno: cust.phoneno, code: cust.code, status: "Unused"});
+
+            if(verification == null)
+            {
+                response.flag = false;
+                response.message = 'Invalid Verification code';
+
+                reject(response);
+            }    
+
+            verification.status = 'Used';
+            
+            var v = await verification.save();
+
+            response.flag = true;
+            response.message = 'Phone No verified successfully';
+            response.payload = v;
+    
+            resolve(response);
+        });
+ 
+    }
+
+    
+    static create(cust) {
+
+        var isNewCustomer = false;
+        var isNewAccount = false;
+
+        var response = {
+            flag: false,
+            message: 'Error signing up',
+            payload: null
+        };
+
+        
+
+      return new Promise(async(resolve, reject) => {
+        
+
+
+        var c = await Customer.findOne({phoneno: cust.phoneno});
+
+        if(c == null)
+        {
+            isNewCustomer = true;
+        }
+
+
+        var ver = await Verification.findOne({phoneno: cust.phoneno, code: cust.code, consumed: 'N'});
+
+        if(ver == null)
+        {
+            response.flag = false;
+            response.message = 'Phone number not verified!';
+
+            reject(response);
+
+            return;
+        }
+
+
+        if(isNewCustomer)
+        {
+            var accno = 0;
+
+            var code = 201;
+
+            var acctype = 'Liability';
+
+            var lastRecord = await Ledger.findOne({accno: { $regex: '.*' + code + '.*' } }).sort({ created: -1 }).limit(1);
+
+            if(lastRecord == null)
+                accno = 1;
+            else
+                accno = parseInt(lastRecord.accno.substr(3)) + 1;
+
+            accno = this.zeroPad(accno,3);
+
+            accno = code + accno;
+
+            ver.consumed = 'Y';
+
+            await ver.save();
+
+            const ledger = new Ledger({
+                accno: accno,
+                accname: cust.username,
+                section: acctype,
+                code: code
+            });
+
+            var l = await ledger.save();
+
+            const customer = new Customer({
+                username: cust.username,
+                email: cust.email,
+                phoneno: cust.phoneno
+            });
+            
+            var c = await customer.save();
+
+            const wallet = new Wallet({
+                ledger: l._id,
+                customer: c._id,
+                acctype: acctype
+            });
+
+            var w = await wallet.save();
+
+            response.flag = true;
+            response.message = 'Account created successfully';
+            response.payload = c;
+
+            console.log(response);
+            resolve(response);
+        }
+        else
+        {
+            response.flag = false;
+            response.message = 'Account already exist!!';
+
+            reject(response);
+        }
+
+            
+
+        
+    //     customer
+    // .save()
+    // .then(async(result) => {
+    //     console.log(result);
+    //     response.flag = true;
+    //     response.message = 'Customer created successfully';
+    //     response.payload = result;
+
+        
+    //     resolve(response);
+    // })
+    // .catch(err => {
+    //     console.log(err)
+    //     reject(error);
+    // });
+      });
+    }
+
+    static applyLoan(cust) {
+
+        var response = {
+            flag: false,
+            message: 'Error signing up',
+            payload: null
+        };
+
+        
+
+      return new Promise(async(resolve, reject) => {
+        const application = new Application({
+            bvn: cust.bvn,
+            amount: cust.amount,
+            duration: cust.duration,
+            phoneno: cust.phoneno
+        });
+
+
+        
+
+     application
+    .save()
+    .then(async(result) => {
+        console.log(result);
+        response.flag = true;
+        response.message = 'Loan Application logged successfully';
+        response.payload = result;
+
+        
+        resolve(response);
+    })
+    .catch(err => {
+        console.log(err)
+        reject(error);
+    });
+            
+
+      
+      });
+    }
+
+    static async createUSSDAccount(cust) {
+
+        var isNewCustomer = false;
+        var isNewAccount = false;
+        var accno = '';
+
+        var response = {
+            flag: false,
+            message: 'Error signing up',
+            payload: null
+        };
+
+        
+
+      
+        const customer = new Customer({
+            firstname: cust.firstname,
+            surname: cust.surname,
+            othername: cust.othername,
+            phoneno: cust.phoneno
+        });
+
+        var acctype = await AccType.findOne({index: cust.acctype});
+
+        if(acctype == null)
+        {
+            response.message = 'Invalid selection';
+            return response;
+        }
+
+
+        var c = await Customer.findOne({phoneno: cust.phoneno});
+
+        if(c == null)
+        {
+            isNewCustomer = true;
+        }
+
+        if(isNewCustomer)
+        {
+            c = await customer.save();
+        }
+
+        var a = await Account.findOne({acctype: acctype._id, customer: c._id});
+        console.log(a);
+        if(a == null)
+        {
+            isNewAccount = true;
+        }
+
+        var lastRecord = await Account.findOne({acctype: acctype._id}).sort({ created: -1 }).limit(1);
+
+        if(lastRecord == null)
+            accno = 1;
+        else
+            accno = parseInt(lastRecord.accno.substr(5)) + 1;
+
+        accno = this.zeroPad(accno,5);
+
+        accno = acctype.code + "01" + accno;
+    
+
+        if(isNewAccount)
+        {
+            const account = new Account({
+                accname: cust.firstname + " " + cust.surname + " " + cust.othername,
+                accno: accno,
+                acctype: acctype._id,
+                customer: c._id
+            });
+            a = await account.save();
+            response.flag = true;
+            response.message = 'Customer created successfully';
+            response.payload = a;
+
+            console.log(response);
+            
+        }
+        else
+        {
+            response.flag = false;
+            response.message = 'Account already created!!';
+        }
+
+        return response;
+ 
+    }
+
+    
+
+    static async createOPAccount(cust) {
+
+        
+        var isNewAccount = false;
+
+        var response = {
+            flag: false,
+            message: 'Error signing up',
+            payload: null
+        };
+
+        
+
+     
+    
+        var c = await Customer.findOne({phoneno: cust.phoneno});
+
+        if(c == null)
+        {
+            isNewCustomer = true;
+        }
+
+
+        var a = await Account.findOne({acctype: cust.acctype, customer: c._id});
+
+        if(a == null)
+        {
+            isNewAccount = true;
+
+            var accno = parseInt(lastRecord.accno.substr(5)) + 1;
+
+            accno = acctype.code + "01" + accno;
+        }
+
+        
+
+        if(isNewAccount)
+        {
+            const account = new Account({
+                accname: cust.firstname + " " + cust.surname + " " + cust.othername,
+                accno: accno,
+                acctype: cust.acctype,
+                customer: c._id
+            });
+            a = await account.save();
+            response.flag = true;
+            response.message = 'OP Account created successfully';
+            response.payload = a;
+
+            console.log(response);
+        }
+        else
+        {
+            response.flag = false;
+            response.message = 'Account already created!!';
+
+            
+        }
+
+            return response;
+
+    }
+
+
+    static async checkBalance(data) {
+
+        var response = {
+            flag: false,
+            message: 'User record not found',
+            payload: null
+        };
+
+        var acctype = await AccType.findOne({index: data.acctype});
+
+        if(acctype == null)
+        {
+            response.message = 'Invalid selection';
+            return response;
+        }
+       
+        var customer = await Customer.findOne({phoneno: data.phoneno});
+
+        if(customer == null)
+        {
+            return response;
+        }
+
+        
+        var account = await Account.findOne({customer: customer._id, acctype: acctype._id});
+
+        if(account == null)
+        {
+            response.message = 'Account type not found';
+            return response;
+        }
+
+        if(account.transCode != data.transCode)
+        {
+            response.message = 'Invalid Transaction Code';
+            return response;
+        }
+
+        response.flag = true;
+        response.payload = account;
+
+        console.log(response);5
+
+        return response;
+
+      
+    }
+
+    
+
+  static async deposit(cust) {
+
+
+
+    var response = {
+        flag: false,
+        message: 'Transaction Error',
+        payload: null
+    };
+
+    var contra = null;
+
+    if(cust.transType == 'DR')
+        contra = 'CR';
+    else
+        contra = 'DR';
+
+    var code = await Code.findOne({data: cust.code, status: 'Unused'});
+
+    if(code == null)
+    {
+        response.message = 'Invalid Deposit Code';
+        return response;
+    }
+
+    var agent = await Agent.findOne({_id: code.agent});
+
+    if(agent == null)
+    {
+        response.message = 'Invalid Agent';
+        return response;
+    }
+
+    var c = await Customer.findOne({phoneno: cust.phoneno});
+
+    if(c == null)
+    {
+        response.message = 'User not registered on the Platform';
+        return response;
+    }
+
+    var acctype = await AccType.findOne({index: cust.acctype});
+
+    if(acctype == null)
+    {
+        response.message = 'Invalid selection';
+        return response;
+    }
+
+    var a = await Account.findOne({acctype: acctype._id, customer: c._id});
+
+    if(a == null)
+    {
+        response.message = 'Account not found';
+        return response;
+    }
+
+
+    
+        const transaction = new Transaction({
+            narration: cust.transType + ": USSD Transaction - " + c.firstname + " " + c.surname,
+            amount: code.amount,
+            source: cust.channel,
+            section: cust.section,
+            tag: 'DM',
+            txRef: this.IDGenerator(),
+            status: cust.status
+        });
+
+        var transact = await transaction.save();
+
+
+        const posting = new Posting({
+            narration: cust.transType + ": USSD Transaction - " + c.firstname + " " + c.surname,
+            accno: a.accno,
+            accno2: acctype.accno,
+            amount: code.amount,
+            transaction: transact._id,
+            transType: cust.transType,
+            acctype: agent.acctype,
+            postMode: cust.section,
+            section: "Main"
+        });
+
+        
+
+        await posting.save();
+
+        const posting2 = new Posting({
+            narration: contra + ": USSD Transaction - " + c.firstname + " " + c.surname,
+            accno: agent.accno,
+            accno2: agent.accno,
+            amount: code.amount,
+            transaction: transact._id,
+            transType: contra,
+            acctype: agent.acctype,
+            postMode: 'GL',
+            section: 'Contra'
+        });
+        
+
+        await posting2.save();
+
+        var updateOps = {availableBal: code.amount};
+
+        var updateOps2 = {availableBal: -code.amount};
+
+        //await Account.update({_id: a._id},{$set: updateOps});
+
+        await Account.findByIdAndUpdate({_id: a._id}, {$inc: updateOps });
+
+        await Ledger.findOneAndUpdate({accno: acctype.accno},{$inc: updateOps});
+
+        await Ledger.findOneAndUpdate({accno: agent.accno},{$inc: updateOps2});
+
+        await Agent.findOneAndUpdate({accno: agent.accno},{$inc: updateOps2});
+
+        response.flag = true;
+        response.message = 'Deposit Transaction performed successfully';
+        response.payload = posting;
+
+        console.log(response);
+        
+    
+    
+
+    return response;
+
+}
+
+
+static async withdraw(cust) {
+
+
+
+    var response = {
+        flag: false,
+        message: 'Transaction Error',
+        payload: null
+    };
+
+    
+    var c = await Customer.findOne({phoneno: cust.phoneno});
+
+    if(c == null)
+    {
+        response.message = 'User not registered on the Platform';
+        return response;
+    }
+
+    var acctype = await AccType.findOne({index: cust.acctype});
+
+    if(acctype == null)
+    {
+        response.message = 'Invalid account Type';
+        return response;
+    }
+
+    var a = await Account.findOne({acctype: acctype._id, customer: c._id});
+
+    if(a == null)
+    {
+        response.message = 'Account not found';
+        return response;
+    }
+
+    var code = this.IDGenerator();
+
+    const withdraw = new Withdrawal({
+        customer: c._id,
+        amount: cust.amount,
+        code: code,
+        account: a._id
+    });
+    
+
+    await withdraw.save();
+
+        response.flag = true;
+        response.message = 'Request Processed Successfully\n. Your Withdrawal code is '+ code;
+        response.payload = withdraw;
+
+        console.log(response);
+        
+    
+    
+
+    return response;
+
+}
+
+
+static async buy_airtime(cust) {
+
+
+    // var response = {
+    //     flag: false,
+    //     message: 'Transaction Error',
+    //     payload: null
+    // };
+
+    // var contra = null;
+
+    
+    //     contra = 'CR';
+   
+
+    // var agent = await Agent.findOne({accno: cust.agentaccno});
+
+    // if(agent == null)
+    // {
+    //     response.message = 'Invalid Biller Agent';
+    //     return response;
+    // }
+
+    // var c = await Customer.findOne({phoneno: cust.phoneno});
+
+    // if(c == null)
+    // {
+    //     response.message = 'User not registered on the Platform';
+    //     return response;
+    // }
+
+    // var acctype = await AccType.findOne({index: cust.acctype});
+
+    // if(acctype == null)
+    // {
+    //     response.message = 'Invalid selection';
+    //     return response;
+    // }
+
+    // var a = await Account.findOne({acctype: acctype._id, customer: c._id});
+
+    // if(a == null)
+    // {
+    //     response.message = 'Account not found';
+    //     return response;
+    // }
+
+
+    
+    //     const transaction = new Transaction({
+    //         narration: cust.transType + ": USSD Transaction - " + c.firstname + " " + c.surname,
+    //         amount: code.amount,
+    //         source: cust.channel,
+    //         section: cust.section,
+    //         tag: 'DM',
+    //         txRef: this.IDGenerator(),
+    //         status: cust.status
+    //     });
+
+    //     var transact = await transaction.save();
+
+
+    //     const posting = new Posting({
+    //         narration: cust.transType + ": USSD Transaction - " + c.firstname + " " + c.surname,
+    //         accno: a.accno,
+    //         accno2: acctype.accno,
+    //         amount: cust.amount,
+    //         transaction: transact._id,
+    //         transType: "DR",
+    //         acctype: agent.acctype,
+    //         postMode: "OP",
+    //         section: "Main"
+    //     });
+
+        
+
+    //     await posting.save();
+
+    //     const posting2 = new Posting({
+    //         narration: contra + ": USSD Transaction - " + c.firstname + " " + c.surname,
+    //         accno: agent.accno,
+    //         accno2: agent.accno,
+    //         amount: cust.amount,
+    //         transaction: transact._id,
+    //         transType: contra,
+    //         acctype: agent.acctype,
+    //         postMode: 'GL',
+    //         section: 'Contra'
+    //     });
+        
+
+    //     await posting2.save();
+
+    //     var updateOps = {availableBal: code.amount};
+
+    //     var updateOps2 = {availableBal: -code.amount};
+
+    //     //await Account.update({_id: a._id},{$set: updateOps});
+
+    //     await Account.findByIdAndUpdate({_id: a._id}, {$inc: updateOps });
+
+    //     await Ledger.findOneAndUpdate({accno: acctype.accno},{$inc: updateOps});
+
+    //     await Ledger.findOneAndUpdate({accno: agent.accno},{$inc: updateOps2});
+
+    //     await Agent.findOneAndUpdate({accno: agent.accno},{$inc: updateOps2});
+
+    //     response.flag = true;
+    //     response.message = 'Deposit Transaction performed successfully';
+    //     response.payload = posting;
+
+    //     console.log(response);
+        
+    
+    
+
+    // return response;
+
+    var response = {
+        flag: false,
+        message: 'Error signing up',
+        payload: null
+    };
+
+    
+
+  return new Promise(async(resolve, reject) => {
+    const airtime = new Airtime({
+        biller: cust.biller,
+        billerName: cust.billerName,
+        amount: cust.amount,
+        phoneno: cust.phoneno
+    });
+
+
+    
+
+ airtime
+.save()
+.then(async(result) => {
+    console.log(result);
+    response.flag = true;
+    response.message = 'Airtime purchase performed successfully';
+    response.payload = result;
+
+    
+    resolve(response);
+})
+.catch(err => {
+    console.log(err)
+    reject(error);
+});
+        
+
+  
+  });
+
+}
+
+
+static IDGenerator() {
+	 
+    var length = 8;
+    var timestamp = +new Date;
+    
+    
+    
+        var ts = timestamp.toString();
+        var parts = ts.split( "" ).reverse();
+        var id = "";
+        
+        for( var i = 0; i < length; ++i ) {
+           var index = this.getRandomInt( 0, parts.length - 1 );
+           id += parts[index];	 
+        }
+        
+        return id;
+    
+
+}
+
+static getRandomInt( min, max ) {
+    return Math.floor( Math.random() * ( max - min + 1 ) ) + min;
+ }
+
+  
+  }
