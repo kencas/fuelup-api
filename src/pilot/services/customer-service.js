@@ -217,6 +217,48 @@ module.exports = class CustomerService{
       });
     }
 
+
+    static async createOrder(cust) {
+
+        var response = {
+            flag: false,
+            message: 'Error creating order',
+            payload: null
+        };
+
+        return new Promise(async(resolve, reject) => {
+        
+            var customer = await Customer.findOne({phoneno: cust.phoneno});
+
+            if(customer == null)
+            {
+                response.flag = false;
+                response.message = 'Invalid Customer';
+
+                reject(response);
+            }    
+
+            var refno = this.getRandomInt(10000000001,11111111111);
+
+            const order = new Order({
+                customer: customer._id,
+                qty: cust.qty,
+                refno: refno
+            });
+
+            var o = await order.save();
+
+            response.flag = false;
+            response.message = 'Order with reference no created successfully';
+            response.payload = {
+                refno: refno
+            };
+    
+            resolve(response);
+        });
+ 
+    }
+
     static applyLoan(cust) {
 
         var response = {
