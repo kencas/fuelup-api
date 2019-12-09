@@ -141,7 +141,7 @@ module.exports = class CustomerService{
 
             var acctype = 'Liability';
 
-            var lastRecord = await Ledger.findOne({accno: { $regex: '.*' + code + '.*' } }).sort({ created: -1 }).limit(1);
+            var lastRecord = await Account.findOne({accno: { $regex: '.*' + code + '.*' } }).sort({ created: -1 }).limit(1);
 
             if(lastRecord == null)
                 accno = 1;
@@ -156,14 +156,16 @@ module.exports = class CustomerService{
 
             await ver.save();
 
-            const ledger = new Ledger({
+
+            const account = new Account({
                 accno: accno,
                 accname: cust.username,
-                section: acctype,
-                code: code
+                code: code,
+                acctype: acctype
             });
 
-            var l = await ledger.save();
+           
+            var a = await account.save();
 
             const customer = new Customer({
                 username: cust.username,
@@ -174,9 +176,10 @@ module.exports = class CustomerService{
             var c = await customer.save();
 
             const wallet = new Wallet({
-                ledger: l._id,
+                account: a._id,
                 customer: c._id,
-                acctype: acctype
+                acctype: acctype,
+                code: code
             });
 
             var w = await wallet.save();

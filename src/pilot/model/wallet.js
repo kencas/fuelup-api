@@ -6,10 +6,11 @@ var Schema = mongoose.Schema;
 var WalletSchema = new Schema(
     {
         customer: {type : Schema.Types.ObjectId, ref: 'Customer'},
-        ledger: {type : Schema.Types.ObjectId, ref: 'Ledger'},
+        account: {type : Schema.Types.ObjectId, ref: 'Account'},
         amount : {type: Number, required: true, default: 0},
         name : {type: String, required: true, default: "My Wallet"},
         acctype : {type: String, required: true, default: "Liability"},
+        code : {type: String, required: true, default: "205"},
         status : {type: String, required: true, default: "Active"},
         created : {type: Date, default: Date.now}
     }
