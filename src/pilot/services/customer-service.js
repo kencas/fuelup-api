@@ -13,7 +13,9 @@ const Verification = require('../model/verification');
 
 const axios = require('axios');
 
-const paystack = require('paystack')('secret_key');
+var SECRET_KEY = 'sk_test_57f4d416f35162f07d67679b57d8536031e7fe08';
+
+const paystack = require('paystack')(SECRET_KEY);
 
 module.exports = class CustomerService{ 
     
