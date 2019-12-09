@@ -13,6 +13,8 @@ const Verification = require('../model/verification');
 
 const axios = require('axios');
 
+const paystack = require('paystack')('secret_key');
+
 module.exports = class CustomerService{ 
     
     constructor() {
@@ -346,23 +348,36 @@ module.exports = class CustomerService{
 
         var SECRET_KEY = 'sk_test_57f4d416f35162f07d67679b57d8536031e7fe08';
 
-        var headers = {
-            Authorization: 'Bearer ' . SECRET_KEY
-        };
+        // var headers = {
+        //     Authorization: 'Bearer ' . SECRET_KEY
+        // };
         
 
-        axios.get('https://api.paystack.co/transaction/verify/' + cust.reference, { headers: headers })
-        .then(async(response) => {
-            var result = response.data;
-            if(result.flag)
-            var customer = await this.fundWallet(cust.phoneno, (result.data.amount / 100), cust.reference);
+        // axios.get('https://api.paystack.co/transaction/verify/' + cust.reference, { headers: headers })
+        // .then(async(response) => {
+        //     var result = response.data;
+        //     if(result.flag)
+        //     var customer = await this.fundWallet(cust.phoneno, (result.data.amount / 100), cust.reference);
             
-          console.log(result);
-          resolve(customer);
-        }, (error) => {
+        //   console.log(result);
+        //   resolve(customer);
+        // }, (error) => {
+        //   console.log(error);
+        //   reject(error);
+        // });
+
+        paystack.transaction.verify({reference: cust.reference})
+        .then(function(body) {
+                if(body.flag){
+                    var customer = await this.fundWallet(cust.phoneno, (result.data.amount / 100), cust.reference);
+                    resolve(customer);
+                }
+                
+      })
+      .catch(function(error) {
           console.log(error);
           reject(error);
-        });
+      });
             
 
       

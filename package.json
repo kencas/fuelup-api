@@ -21,6 +21,7 @@
     "mongoose-update-if-current": "^1.0.3",
     "morgan": "^1.9.0",
     "nodemon": "^1.18.3",
+    "paystack": "^2.0.1",
     "promise-mysql": "^3.3.1",
     "socket.io": "^2.1.1"
   }
