@@ -2,7 +2,7 @@ const Posting  = require('../model/posting');
 const Transaction  = require('../model/transaction');
 const Ledger  = require('../model/ledger');
 const Agent  = require('../model/agent');
-const Bank  = require('../model/bank');
+const Order = require('../model/order');
 
 module.exports = class AgentService{ 
     
