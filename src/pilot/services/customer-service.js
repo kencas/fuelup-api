@@ -370,6 +370,7 @@ module.exports = class CustomerService{
 
         paystack.transaction.verify({reference: cust.reference})
         .then(async function(body) {
+            console.log(body);
                 if(body.flag){
                     var customer = await this.fundWallet(cust.phoneno, (result.data.amount / 100), cust.reference);
                     resolve(customer);
