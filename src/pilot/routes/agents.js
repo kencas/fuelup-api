@@ -93,9 +93,13 @@ router.get('/getsingleorder', async(req, res, next) => {
 
     const id = req.query.refno;
 
+    const payload = {};
+
     try
     {
         let order = await agentService.getOrder(id);
+
+        
        
         res.status(200).json(order);
     }

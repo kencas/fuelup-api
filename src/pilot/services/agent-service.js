@@ -36,11 +36,28 @@ module.exports = class AgentService{
 
 static async getOrder(ref) {
 
-     
-  var order = await Order.findOne({refno: ref});
+  var response = {
+    flag: false,
+    message: 'Error loading transaction',
+    payload: {}
+};
+
+  var order = await Order.findOne({refno: ref}).populate('customer');
+
+  if(order != null)
+        {
+          response.flag = true;
+          response.message = "Tranbsaction retrieved";
+            response.payload = {
+                refno: order.refno,
+                qty: order.qty,
+                customer : customer
+            }
+        }
+        
   
   
-  return order;
+  return response;
 }
 
 
