@@ -42,7 +42,6 @@ const prepaidRoutes = require('./pilot/routes/prepaids');
 const accTypeRoutes = require('./pilot/routes/acctypes');
 const reportRoutes = require('./pilot/routes/reports');
 const loanRoutes = require('./pilot/routes/loans');
-const airtimeRoutes = require('./pilot/routes/airtimes');
 // // app.use((req,res,next) => {
 // //     res.status(200).json({
 // //         message: "it works well for me"
@@ -84,7 +83,6 @@ const airtimeRoutes = require('./pilot/routes/airtimes');
  app.use('/acctypes',accTypeRoutes);
  app.use('/reports',reportRoutes);
  app.use('/loans',loanRoutes);
- app.use('/airtimes',airtimeRoutes);
 
 // app.use((req, res, next) =>{
 //     const error = new Error('Invalid request');
