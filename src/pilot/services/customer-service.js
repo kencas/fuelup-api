@@ -372,7 +372,7 @@ module.exports = class CustomerService{
         .then(async function(body) {
             console.log(body);
                 if(body.status){
-                    var customer = await CustomerService.this.fundwallet(cust.phoneno, (body.data.amount / 100), body.data.reference);
+                    var customer = await fundwallet(cust.phoneno, (body.data.amount / 100), body.data.reference);
                     resolve(customer);
                 }
                 
