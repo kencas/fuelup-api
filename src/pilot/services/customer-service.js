@@ -18,6 +18,8 @@ var SECRET_KEY = 'sk_test_57f4d416f35162f07d67679b57d8536031e7fe08';
 const paystack = require('paystack')(SECRET_KEY);
 
 module.exports = class CustomerService{ 
+
+    
     
     constructor() {
       
@@ -342,6 +344,8 @@ module.exports = class CustomerService{
             payload: null
         };
 
+        const self = this;
+
         
 
       return new Promise(async(resolve, reject) => {
@@ -372,7 +376,7 @@ module.exports = class CustomerService{
         .then(async function(body) {
             console.log(body);
                 if(body.status){
-                    var customer = await fundwallet(cust.phoneno, (body.data.amount / 100), body.data.reference);
+                    var customer = await self.fundwallet(cust.phoneno, (body.data.amount / 100), body.data.reference);
                     resolve(customer);
                 }
                 
@@ -388,7 +392,7 @@ module.exports = class CustomerService{
     }
 
 
-    static async fundwallet(phoneno, amount, refno) {
+    async fundwallet(phoneno, amount, refno) {
 
         
         var isNewAccount = false;
