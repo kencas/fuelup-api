@@ -430,7 +430,11 @@ module.exports = class CustomerService{
             
             response.flag = true;
             response.message = "Transaction completed successfully";
-            response.payload = c;
+            response.payload = {
+                reference: refno,
+                phoneno: phoneno,
+                amount: amount
+            };
 
             return response;
 
