@@ -392,7 +392,7 @@ module.exports = class CustomerService{
     }
 
 
-    async fundwallet(phoneno, amount, refno) {
+    static async fundwallet(phoneno, amount, refno) {
 
         
         var isNewAccount = false;
