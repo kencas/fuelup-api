@@ -407,7 +407,7 @@ module.exports = class CustomerService{
 
      
     
-        var c = await Fund.findOne({phoneno: phoneno, refno: refno, status: "Pending"});
+        var c = await Fund.findOne({phoneno: phoneno, reference: refno, status: "Pending"});
 
         if(c == null)
         {
