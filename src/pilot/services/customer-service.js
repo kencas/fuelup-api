@@ -114,7 +114,8 @@ module.exports = class CustomerService{
         var response = {
             flag: false,
             message: 'Error Verification',
-            payload: null
+            isnewuser: false,
+            payload: {}
         };
 
         return new Promise(async(resolve, reject) => {
@@ -155,10 +156,8 @@ module.exports = class CustomerService{
 
             response.flag = true;
             response.message = 'Phone Number verified successfully';
-            response.payload = {
-                isnewuser : isnewuser,
-                cst: cst
-            };
+            response.isnewuser = isnewuser;
+            response.payload = cst;
     
             resolve(response);
         });
@@ -426,7 +425,18 @@ module.exports = class CustomerService{
 
             wallet.amount += amount;
 
-            wallet.save();
+            await wallet.save();
+
+            const transaction = new Transaction({
+                customer: cd._id,
+                amount: amount,
+                narration: "Wallet funding - " + refno,
+                txRef: refno,
+                section: "User",
+                tag: "DM"
+            });
+
+            await transaction.save();
             
             response.flag = true;
             response.message = "Transaction completed successfully";
