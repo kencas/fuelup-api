@@ -14,6 +14,8 @@ var clients = {};
 
 var agents = {};
 
+io.configure(function() { io.set("transports", ["xhr-polling", "flashsocket", "json-polling"]); });
+
 io.on('connection', function(socket){
 
     console.log("Cleint connected: " + socket.id);
@@ -26,7 +28,7 @@ io.on('connection', function(socket){
             payload: data
         };
 
-        console.log("Data: " + data);
+        console.log("Login Data: " + data);
 
         clients[data.agentId] = {
           "socket": socket.id
