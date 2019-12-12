@@ -51,6 +51,7 @@ static async getOrder(ref) {
             response.payload = {
                 refno: order.refno,
                 qty: order.qty,
+                amount: order.price,
                 customer : { username: order.customer.username,
                              customerNo: order.customer.customerNo
                             }
