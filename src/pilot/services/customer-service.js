@@ -69,6 +69,42 @@ module.exports = class CustomerService{
  
     }
 
+    static async configurepin(cust) {
+
+        var response = {
+            flag: false,
+            message: 'Error Verification',
+            payload: null
+        };
+
+        return new Promise(async(resolve, reject) => {
+
+        
+        
+
+        
+            var verification = Verification.findOne({_id: cust.verifier, status: "Used",phoneno: cust.phoneno});    
+            
+            if(verification == null)
+            {
+                response.message = 'Phone number not verified';
+                
+    
+                reject(response);
+                return;
+
+            }
+
+            response.flag = true;
+            response.message = 'Pin code configured successfully';
+            response.payload = v;
+    
+                resolve(response);
+
+            });
+ 
+    }
+
 
     static async initfunding(cust) {
 
@@ -312,13 +348,29 @@ module.exports = class CustomerService{
                 response.message = 'Invalid Customer';
 
                 reject(response);
+
+                return;
+            }    
+
+            var agent = await Agent.findOne({refno: cust.agentId});
+
+            if(agent == null)
+            {
+                response.flag = false;
+                response.message = 'Invalid Agent';
+
+                reject(response);
+
+                return;
             }    
 
             var refno = this.getRandomInt(10000000001,11111111111);
 
             const order = new Order({
                 customer: customer._id,
+                agent: agent._id,
                 qty: cust.qty,
+                price: (cust.qty * agent.unitprice),
                 refno: refno
             });
 

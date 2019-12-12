@@ -51,13 +51,212 @@ static async getOrder(ref) {
             response.payload = {
                 refno: order.refno,
                 qty: order.qty,
-                customer : order.customer
+                customer : { username: order.customer.username,
+                             customerNo: order.customer.customerNo
+                            }
             }
         }
         
   
   
   return response;
+}
+
+static async acceptProcessOrder(cust) {
+
+  var response = {
+      flag: false,
+      message: 'Error accepting order',
+      payload: {}
+  };
+
+  return new Promise(async(resolve, reject) => {
+  
+      var order = await Order.findOne({refno: cust.referenceno});
+
+      if(order == null)
+      {
+          response.flag = false;
+          response.message = 'Invalid Order';
+
+          reject(response);
+
+          return;
+      }
+      
+      var agent = await Agent.findOne({refno: cust.agentId});
+
+      if(agent == null)
+      {
+          response.flag = false;
+          response.message = 'Invalid Agent';
+
+          reject(response);
+
+          return;
+      }
+
+      var wallet = await Wallet.findOne({customer: order.customer});
+
+      if(wallet.amount < (agent.unitprice * order.qty))
+      {
+        response.flag = false;
+        response.message = 'Low balance to complete transaction';
+
+        reject(response);
+
+        return;
+      }
+
+
+      wallet.amount -= (agent.unitprice * order.qty);
+
+      await wallet.save();
+
+      agent.availableBal -= (agent.unitprice * order.qty);
+
+      await agent.save();
+
+      order.agent = agent._id;
+      order.status = "Accepted";
+      
+
+      var o = await order.save();
+
+      response.flag = false;
+      response.message = 'Order with reference no ' + order.refno+ ' processed successfully';
+      
+
+      resolve(response);
+  });
+
+}
+
+
+static async acceptOrder(cust) {
+
+  var response = {
+      flag: false,
+      message: 'Error accepting order',
+      payload: {}
+  };
+
+  return new Promise(async(resolve, reject) => {
+  
+      var order = await Order.findOne({refno: cust.refno});
+
+      if(order == null)
+      {
+          response.flag = false;
+          response.message = 'Invalid Order';
+
+          reject(response);
+
+          return;
+      }
+      
+      var agent = await Agent.findOne({refno: cust.agentId});
+
+      if(agent == null)
+      {
+          response.flag = false;
+          response.message = 'Invalid Agent';
+
+          reject(response);
+
+          return;
+      }
+
+      order.agent = agent._id;
+      order.status = "Accepted";
+      order.isAccepted = "Y";
+      
+
+      var o = await order.save();
+
+      response.flag = true;
+      response.payload = {
+        orderId: cust.refno
+      }
+
+      response.message = 'Order with reference no ' + order.refno+ ' have been accepted successfully';
+      
+
+      resolve(response);
+  });
+
+}
+
+
+static async processOrder(cust) {
+
+  var response = {
+      flag: false,
+      message: 'Error accepting order',
+      payload: {}
+  };
+
+  return new Promise(async(resolve, reject) => {
+  
+      var order = await Order.findOne({agent: cust.agentId, refno: cust.referenceno});
+
+      if(order == null)
+      {
+          response.flag = false;
+          response.message = 'Invalid Order';
+
+          reject(response);
+
+          return;
+      }
+      
+      var agent = await Agent.findOne({refno: cust.agentId});
+
+      if(agent == null)
+      {
+          response.flag = false;
+          response.message = 'Invalid Agent';
+
+          reject(response);
+
+          return;
+      }
+
+      var wallet = await Wallet.findOne({customer: order.customer});
+
+      if(wallet.amount < (agent.unitprice * order.qty))
+      {
+        response.flag = false;
+        response.message = 'Low balance to complete transaction';
+
+        reject(response);
+
+        return;
+      }
+
+
+      wallet.amount -= (agent.unitprice * order.qty);
+
+      await wallet.save();
+
+      agent.availableBal -= (agent.unitprice * order.qty);
+
+      await agent.save();
+
+      order.agent = agent._id;
+      order.status = "Accepted";
+      order.isPaid = "Y";
+      
+
+      var o = await order.save();
+
+      response.flag = false;
+      response.message = 'Order with reference no ' + order.refno+ ' processed successfully';
+      
+
+      resolve(response);
+  });
+
 }
 
 
