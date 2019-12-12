@@ -22,6 +22,8 @@ var clients = {};
 var agents = {};
 
 io.on('connection', function(socket){
+
+    console.log("Cleint connected: " + socket.id);
  
     socket.on('agentlogin', function(data){
 
