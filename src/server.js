@@ -16,7 +16,7 @@ var agents = {};
 
 // io.configure(function() { io.set("transports", ["xhr-polling", "flashsocket", "json-polling"]); });
 
-io.set("transports", ["websocket"]);
+//io.set("transports", ["websocket"]);
 
 io.on('connection', function(socket){
 
