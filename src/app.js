@@ -13,45 +13,7 @@ app.use(function(req, res, next) {
 const mongoose = require('mongoose');
 const config = require('./config');
 
-// var http = require('http').Server(app);
- 
-// var io = require('socket.io')(http);
 
-var clients = {};
-
-var agents = {};
-
-io.on('connection', function(socket){
-
-    console.log("Cleint connected: " + socket.id);
- 
-    socket.on('agentlogin', function(data){
-
-        var response = {
-            message: "Login successful",
-            flag: true,
-            payload: data
-        };
-
-        console.log("Data: " + data);
-
-        clients[data.agentId] = {
-          "socket": socket.id
-        };
-
-        io.to(socket.id).emit('agentlogonsuccess', response);
-      });
-
-
-      socket.on('notifyorder', function(data){
-        io.to(clients[data.agentId].socket).emit('neworder', {
-            message: "New order created",
-            flag: true,
-            payload: data.order
-        });
-      });
- 
-});
 
 
 mongoose.connect(config.database,{ useNewUrlParser: true },function(err)
