@@ -21,6 +21,22 @@ router.get('/',async(req, res, next) => {
 });
 
 
+router.get('/list',async(req, res, next) => {
+    
+    try
+    {
+        let agents;
+
+        agents = await agentService.list();
+        res.status(200).json(agents);
+      } 
+      catch (err) 
+      {
+        return res.status(500).send(err);
+      }
+});
+
+
 router.post('/',(req, res, next) => {
 
     

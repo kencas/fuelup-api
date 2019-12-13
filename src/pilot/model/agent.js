@@ -6,6 +6,7 @@ var Schema = mongoose.Schema;
 var AgentSchema = new Schema(
     {
         codes: [{type : Schema.Types.ObjectId, ref: 'Code'}],
+        merchant: {type : Schema.Types.ObjectId, ref: 'Merchant'},
         ledger: {type : Schema.Types.ObjectId, ref: 'Ledger'},
         refno : {type: String, required: true, default: "NA"},
         accno : {type: String, required: true, default: "USSD"},

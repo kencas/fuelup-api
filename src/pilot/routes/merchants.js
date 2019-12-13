@@ -1,8 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-const channelService = require('../services/channel-service');
-const channelDAO = require('../dao/ChannelDAO');
+const merchantService = require('../services/merchant-service');
 
 router.get('/',async(req, res, next) => {
     
@@ -10,8 +9,8 @@ router.get('/',async(req, res, next) => {
     {
         let charges;
 
-        channels = await channelDAO.list();
-        res.status(200).json(channels);
+        merchants = await merchantService.list();
+        res.status(200).json(merchants);
       } 
       catch (err) 
       {
@@ -23,7 +22,7 @@ router.get('/',async(req, res, next) => {
 router.post('/',(req, res, next) => {
 
     
-    channelDAO.create(req.body)
+    merchantService.create(req.body)
     .then(result => {
         console.log(result),
         res.status(200).json(result);
@@ -44,9 +43,9 @@ router.get('/:id', async(req, res, next) => {
 
     try
     {
-        let channel = await channelService.get(id);
+        let merchant = await merchantService.get(id);
        
-        res.status(200).json(channel);
+        res.status(200).json(merchant);
     }
     catch (err) 
       {

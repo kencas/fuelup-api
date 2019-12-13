@@ -19,7 +19,7 @@ module.exports = class AgentService{
 
       
        
-        return await Agent.find();
+        return await Agent.find().populate('merchant');
 
       
     }
@@ -34,7 +34,7 @@ module.exports = class AgentService{
       return agent;
 }
 
-static async getOrder(ref) {
+static async getOrder(ref, agentId) {
 
   var response = {
     flag: false,
@@ -42,7 +42,7 @@ static async getOrder(ref) {
     payload: {}
 };
 
-  var order = await Order.findOne({refno: ref}).populate('customer');
+  var order = await Order.findOne({refno: ref, agent: agentId}).populate('customer');
 
   if(order != null)
         {
@@ -298,6 +298,7 @@ return new Promise(async(resolve, reject) => {
 
   const agent = new Agent({
     ledger: l._id,
+    merchant: cust.merchant,
     refno: cust.refno,
     name: cust.name,
     acctype: acctype,
