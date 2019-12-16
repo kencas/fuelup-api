@@ -162,7 +162,7 @@ router.get('/getsingleorder', async(req, res, next) => {
 
 router.get('/orders', async(req, res, next) => {
 
-    const agentId = req.query.agentId;
+    const agentId = req.query.refno;
 
     const payload = {};
 
