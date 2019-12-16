@@ -392,7 +392,8 @@ return new Promise(async(resolve, reject) => {
   response.payload = {
     refno: agent.refno,
     balance: agent.availableBal,
-    agentId: agent.refno
+    agentId: agent.refno,
+    name: agent.name
   };;
 
   
