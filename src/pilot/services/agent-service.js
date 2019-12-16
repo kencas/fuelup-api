@@ -504,7 +504,7 @@ static async listOrder(agentId) {
 
   var agent = await Agent.findOne({refno: agentId});
         
-  return await Order.findOne({agent: agent._id});
+  return await Order.find({agent: agent._id});
 
   
 
