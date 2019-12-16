@@ -500,6 +500,16 @@ var contraaccount = await Ledger.findOne({accno: cust.acccontra});
 
 }
 
+static async listOrder(agentId) {
+
+  var agent = await Agent.findOne({refno: agentId});
+        
+  return await Order.findOne({agent: agent._id});
+
+  
+
+}
+
 
 static IDGenerator() {
 	 
