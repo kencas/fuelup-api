@@ -362,7 +362,7 @@ static login(cust) {
   var response = {
       flag: false,
       message: 'Error logging in',
-      payload: null
+      payload: {}
   };
 
   
