@@ -391,7 +391,8 @@ return new Promise(async(resolve, reject) => {
   response.message = 'Agent logged in successfully';
   response.payload = {
     refno: agent.refno,
-    balance: agent.availableBal
+    balance: agent.availableBal,
+    agentId: agent.refno
   };;
 
   
