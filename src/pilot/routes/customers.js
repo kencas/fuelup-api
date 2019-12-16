@@ -37,6 +37,24 @@ router.post('/verifyOTP',(req, res, next) => {
 });
 
 
+
+router.post('/configurePin',(req, res, next) => {
+
+    
+    customerService.configurepin(req.body)
+    .then(result => {
+        console.log(result),
+        res.status(200).json(result);
+    })
+    .catch(err => {
+            
+         console.log(err),
+        res.status(500).json(err);
+    });
+
+});
+
+
 router.post('/signup',(req, res, next) => {
 
     
@@ -103,13 +121,28 @@ router.post('/verifytransaction',(req, res, next) => {
 
 
 
+router.get('/orders',async(req, res, next) => {
+    
+    try
+    {
+        let orders;
+
+        orders = await customerService.listOrder(req.query.customerId);
+        res.status(200).json(orders);
+      } 
+      catch (err) 
+      {
+        return res.status(500).send(err);
+      }
+});
+
 router.get('/transactions',async(req, res, next) => {
     
     try
     {
-        let customers;
+        let transactions;
 
-        transactions = await customerService.listTransactions();
+        transactions = await customerService.listTransaction(req.query.customerId);
         res.status(200).json(transactions);
       } 
       catch (err) 

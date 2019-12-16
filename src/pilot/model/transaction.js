@@ -5,8 +5,8 @@ var Schema = mongoose.Schema;
 
 var TransactionSchema = new Schema(
     {
+        wallet: {type : Schema.Types.ObjectId, ref: 'Wallet'},
         agent: {type : Schema.Types.ObjectId, ref: 'Agent'},
-        customer: {type : Schema.Types.ObjectId, ref: 'Customer'},
         amount : {type: Number, required: true, default: 0.00},
         source : {type: String, required: true, default: "USSD"},
         txRef : {type: String, required: true, default: "000"},

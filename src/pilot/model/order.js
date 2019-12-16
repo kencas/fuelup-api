@@ -9,6 +9,8 @@ var OrderSchema = new Schema(
         agent : {type : Schema.Types.ObjectId, ref: 'Agent'},
         qty : {type: String, required: true, default: 0},
         price : {type: String, required: true, default: 0.00},
+        orderType: {type: String, required: true, default: "Quantity"},
+        description: {type: String, required: true, default: "NA"},
         isAccepted : {type: String, required: true, default: "N"},
         isPaid : {type: String, required: true, default: "N"},
         isDelivered : {type: String, required: true, default: "N"},

@@ -42,7 +42,15 @@ static async getOrder(ref, agentId) {
     payload: {}
 };
 
-  var order = await Order.findOne({refno: ref, agent: agentId}).populate('customer');
+var agent = await Agent.findOne({refno: agentId});
+if(agent == null)
+{
+  response.message = "Invalid agent";
+
+  return response;
+}
+
+  var order = await Order.findOne({refno: ref, agent: agent._id}).populate('customer');
 
   if(order != null)
         {
@@ -73,17 +81,7 @@ static async acceptProcessOrder(cust) {
 
   return new Promise(async(resolve, reject) => {
   
-      var order = await Order.findOne({refno: cust.referenceno});
-
-      if(order == null)
-      {
-          response.flag = false;
-          response.message = 'Invalid Order';
-
-          reject(response);
-
-          return;
-      }
+      
       
       var agent = await Agent.findOne({refno: cust.agentId});
 
@@ -97,32 +95,65 @@ static async acceptProcessOrder(cust) {
           return;
       }
 
-      var wallet = await Wallet.findOne({customer: order.customer});
+      var order = await Order.findOne({refno: cust.refno, agent: agent._id, isProcessed: 'N'});
 
-      if(wallet.amount < (agent.unitprice * order.qty))
+      if(order == null)
       {
-        response.flag = false;
-        response.message = 'Low balance to complete transaction';
+          response.flag = false;
+          response.message = 'Invalid Order';
 
-        reject(response);
+          reject(response);
 
-        return;
+          return;
       }
 
 
-      wallet.amount -= (agent.unitprice * order.qty);
+      if(order.isOTPValidated == 'N')
+      {
+          response.flag = false;
+          response.message = 'OTP not validated from customer';
+          response.payload = {
+            isOTPValidated: 'N',
+            refno: order.refno
+          };
 
-      await wallet.save();
+          reject(response);
 
-      agent.availableBal -= (agent.unitprice * order.qty);
+          return;
+      }
+
+      var amount = Number(order.price);
+
+      var balance =  Number(agent.availableBal);
+
+      
+      
+      balance += Number(order.price);
+
+      agent.availableBal = balance;
 
       await agent.save();
 
       order.agent = agent._id;
-      order.status = "Accepted";
+      order.status = "Proccesed";
+      order.isProcessed = 'Y';
+      order.isAccepted = 'Y';
+      order.isDelivered = 'Y';
       
 
       var o = await order.save();
+
+
+      const transaction = new Transaction({
+        agent: agent._id,
+        amount: amount,
+        narration: "Order processed - " + order.refno,
+        txRef: order.refno,
+        section: "Agent",
+        tag: "PO"
+    });
+
+    await transaction.save();
 
       response.flag = false;
       response.message = 'Order with reference no ' + order.refno+ ' processed successfully';

@@ -103,6 +103,23 @@ router.post('/acceptOrder',(req, res, next) => {
 });
 
 
+router.post('/processOrder',(req, res, next) => {
+
+    
+    agentService.acceptProcessOrder(req.body)
+    .then(result => {
+        console.log(result),
+        res.status(200).json(result);
+    })
+    .catch(err => {
+            
+         console.log(err),
+        res.status(500).json(err);
+    });
+
+});
+
+
 
 // router.get('/:id', async(req, res, next) => {
 
@@ -124,12 +141,13 @@ router.post('/acceptOrder',(req, res, next) => {
 router.get('/getsingleorder', async(req, res, next) => {
 
     const id = req.query.refno;
+    const agentId = req.query.agentId;
 
     const payload = {};
 
     try
     {
-        let order = await agentService.getOrder(id);
+        let order = await agentService.getOrder(id, agentId);
 
         
        

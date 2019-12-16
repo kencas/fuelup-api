@@ -73,7 +73,7 @@ module.exports = class CustomerService{
 
         var response = {
             flag: false,
-            message: 'Error Verification',
+            message: 'Error performing operation',
             payload: null
         };
 
@@ -83,7 +83,7 @@ module.exports = class CustomerService{
         
 
         
-            var verification = Verification.findOne({_id: cust.verifier, status: "Used",phoneno: cust.phoneno});    
+            var verification = await Verification.findOne({code: cust.code, status: "Used",phoneno: cust.phoneno});    
             
             if(verification == null)
             {
@@ -95,9 +95,18 @@ module.exports = class CustomerService{
 
             }
 
+            var customer = await Customer.findOne({phoneno: verification.phoneno});
+
+            customer.transcode =cust.pincode;
+            customer.isconfiguredcode = 'Y';
+
+            customer.save();
+
             response.flag = true;
             response.message = 'Pin code configured successfully';
-            response.payload = v;
+            response.payload = {
+                phoneno: verification.phoneno
+            };
     
                 resolve(response);
 
@@ -338,8 +347,16 @@ module.exports = class CustomerService{
             payload: null
         };
 
+        var total = 0;
+        var qty = 0;
+
+        var description = '';
+
+        var isOTPValidated = 'N';
+        var isPaid = 'N';
+
         return new Promise(async(resolve, reject) => {
-        
+
             var customer = await Customer.findOne({phoneno: cust.phoneno});
 
             if(customer == null)
@@ -350,7 +367,26 @@ module.exports = class CustomerService{
                 reject(response);
 
                 return;
-            }    
+            }   
+
+            if(cust.validateOTP == 'Y')
+            {
+                var customer = await Customer.findOne({phoneno: cust.phoneno, transcode: cust.otp, isconfiguredcode: "Y"});
+
+                if(customer == null)
+                {
+                    response.flag = false;
+                    response.message = 'OTP Validation failed';
+
+                    reject(response);
+
+                    return;
+                }    
+
+                isOTPValidated = "Y";
+            }
+        
+             
 
             var agent = await Agent.findOne({refno: cust.agentId});
 
@@ -362,19 +398,75 @@ module.exports = class CustomerService{
                 reject(response);
 
                 return;
-            }    
+            }   
+            
+            if(cust.orderType == 'Quantity')
+            {
+                qty = cust.qty
+                total = agent.unitprice * cust.qty;
+                description = 'Purchase of ' + cust.qty + ' litres of fuel';
+            }
+            
+            else
+            {
+                qty = Number(cust.amount / agent.unitprice);
+                total = cust.amount;
+                description = 'Purchase of fuel for amount: ' + total;
+            }
+            
 
-            var refno = this.getRandomInt(10000000001,11111111111);
+            var wallet = await Wallet.findOne({customer: customer._id});
 
-            const order = new Order({
-                customer: customer._id,
-                agent: agent._id,
-                qty: cust.qty,
-                price: (cust.qty * agent.unitprice),
-                refno: refno
-            });
+      if(wallet.amount < Number(total))
+      {
+        response.flag = false;
+        response.message = 'Low balance to complete transaction';
+
+        reject(response);
+
+        return;
+      }
+
+
+      wallet.amount -= Number(total);
+
+      await wallet.save();
+
+      isPaid = 'Y';
+
+      var refno = this.getRandomInt(10000000001,11111111111);
+
+      const transaction = new Transaction({
+        wallet: wallet._id,
+        amount: total,
+        narration: "Order created - " + refno,
+        txRef: refno,
+        section: "User",
+        tag: "CO"
+    });
+
+    await transaction.save();
+
+
+            
+
+           
+                const order = new Order({
+                    customer: customer._id,
+                    agent: agent._id,
+                    qty: qty,
+                    orderType: cust.orderType,
+                    isOTPValidated: isOTPValidated,
+                    isPaid: isPaid,
+                    price: total,
+                    refno: refno
+                });
+    
+            
 
             var o = await order.save();
+
+            
 
             response.flag = false;
             response.message = 'Order with reference no ' + refno + ' created successfully';
@@ -480,7 +572,7 @@ module.exports = class CustomerService{
             await wallet.save();
 
             const transaction = new Transaction({
-                customer: cd._id,
+                wallet: wallet._id,
                 amount: amount,
                 narration: "Wallet funding - " + refno,
                 txRef: refno,
@@ -503,406 +595,41 @@ module.exports = class CustomerService{
     }
 
 
-    static async checkBalance(data) {
-
-        var response = {
-            flag: false,
-            message: 'User record not found',
-            payload: null
-        };
-
-        var acctype = await AccType.findOne({index: data.acctype});
-
-        if(acctype == null)
-        {
-            response.message = 'Invalid selection';
-            return response;
-        }
-       
-        var customer = await Customer.findOne({phoneno: data.phoneno});
-
-        if(customer == null)
-        {
-            return response;
-        }
+    static async listOrder(customerId) {
 
         
-        var account = await Account.findOne({customer: customer._id, acctype: acctype._id});
+        return await Order.findOne({customer: customerId});
 
-        if(account == null)
-        {
-            response.message = 'Account type not found';
-            return response;
-        }
-
-        if(account.transCode != data.transCode)
-        {
-            response.message = 'Invalid Transaction Code';
-            return response;
-        }
-
-        response.flag = true;
-        response.payload = account;
-
-        console.log(response);5
-
-        return response;
-
+        
       
     }
 
-    
 
-  static async deposit(cust) {
+    static async listTransaction(customerId) {
 
+        var wallet = await Wallet.findOne({customer: customerId});
 
-
-    var response = {
-        flag: false,
-        message: 'Transaction Error',
-        payload: null
-    };
-
-    var contra = null;
-
-    if(cust.transType == 'DR')
-        contra = 'CR';
-    else
-        contra = 'DR';
-
-    var code = await Code.findOne({data: cust.code, status: 'Unused'});
-
-    if(code == null)
-    {
-        response.message = 'Invalid Deposit Code';
-        return response;
-    }
-
-    var agent = await Agent.findOne({_id: code.agent});
-
-    if(agent == null)
-    {
-        response.message = 'Invalid Agent';
-        return response;
-    }
-
-    var c = await Customer.findOne({phoneno: cust.phoneno});
-
-    if(c == null)
-    {
-        response.message = 'User not registered on the Platform';
-        return response;
-    }
-
-    var acctype = await AccType.findOne({index: cust.acctype});
-
-    if(acctype == null)
-    {
-        response.message = 'Invalid selection';
-        return response;
-    }
-
-    var a = await Account.findOne({acctype: acctype._id, customer: c._id});
-
-    if(a == null)
-    {
-        response.message = 'Account not found';
-        return response;
-    }
-
+        return await Transaction.findOne({wallet: wallet._id});
 
     
-        const transaction = new Transaction({
-            narration: cust.transType + ": USSD Transaction - " + c.firstname + " " + c.surname,
-            amount: code.amount,
-            source: cust.channel,
-            section: cust.section,
-            tag: 'DM',
-            txRef: this.IDGenerator(),
-            status: cust.status
+      
+    }
+
+    static async checkLoanEligibility()
+    {
+        var response = {
+            flag: false,
+            message: 'You are ineligible forthe loan',
+            payload: {}
+        };
+
+
+        return new Promise(async(resolve, reject) => {
+            
+
         });
 
-        var transact = await transaction.save();
-
-
-        const posting = new Posting({
-            narration: cust.transType + ": USSD Transaction - " + c.firstname + " " + c.surname,
-            accno: a.accno,
-            accno2: acctype.accno,
-            amount: code.amount,
-            transaction: transact._id,
-            transType: cust.transType,
-            acctype: agent.acctype,
-            postMode: cust.section,
-            section: "Main"
-        });
-
-        
-
-        await posting.save();
-
-        const posting2 = new Posting({
-            narration: contra + ": USSD Transaction - " + c.firstname + " " + c.surname,
-            accno: agent.accno,
-            accno2: agent.accno,
-            amount: code.amount,
-            transaction: transact._id,
-            transType: contra,
-            acctype: agent.acctype,
-            postMode: 'GL',
-            section: 'Contra'
-        });
-        
-
-        await posting2.save();
-
-        var updateOps = {availableBal: code.amount};
-
-        var updateOps2 = {availableBal: -code.amount};
-
-        //await Account.update({_id: a._id},{$set: updateOps});
-
-        await Account.findByIdAndUpdate({_id: a._id}, {$inc: updateOps });
-
-        await Ledger.findOneAndUpdate({accno: acctype.accno},{$inc: updateOps});
-
-        await Ledger.findOneAndUpdate({accno: agent.accno},{$inc: updateOps2});
-
-        await Agent.findOneAndUpdate({accno: agent.accno},{$inc: updateOps2});
-
-        response.flag = true;
-        response.message = 'Deposit Transaction performed successfully';
-        response.payload = posting;
-
-        console.log(response);
-        
-    
-    
-
-    return response;
-
-}
-
-
-static async withdraw(cust) {
-
-
-
-    var response = {
-        flag: false,
-        message: 'Transaction Error',
-        payload: null
-    };
-
-    
-    var c = await Customer.findOne({phoneno: cust.phoneno});
-
-    if(c == null)
-    {
-        response.message = 'User not registered on the Platform';
-        return response;
     }
-
-    var acctype = await AccType.findOne({index: cust.acctype});
-
-    if(acctype == null)
-    {
-        response.message = 'Invalid account Type';
-        return response;
-    }
-
-    var a = await Account.findOne({acctype: acctype._id, customer: c._id});
-
-    if(a == null)
-    {
-        response.message = 'Account not found';
-        return response;
-    }
-
-    var code = this.IDGenerator();
-
-    const withdraw = new Withdrawal({
-        customer: c._id,
-        amount: cust.amount,
-        code: code,
-        account: a._id
-    });
-    
-
-    await withdraw.save();
-
-        response.flag = true;
-        response.message = 'Request Processed Successfully\n. Your Withdrawal code is '+ code;
-        response.payload = withdraw;
-
-        console.log(response);
-        
-    
-    
-
-    return response;
-
-}
-
-
-static async buy_airtime(cust) {
-
-
-    // var response = {
-    //     flag: false,
-    //     message: 'Transaction Error',
-    //     payload: null
-    // };
-
-    // var contra = null;
-
-    
-    //     contra = 'CR';
-   
-
-    // var agent = await Agent.findOne({accno: cust.agentaccno});
-
-    // if(agent == null)
-    // {
-    //     response.message = 'Invalid Biller Agent';
-    //     return response;
-    // }
-
-    // var c = await Customer.findOne({phoneno: cust.phoneno});
-
-    // if(c == null)
-    // {
-    //     response.message = 'User not registered on the Platform';
-    //     return response;
-    // }
-
-    // var acctype = await AccType.findOne({index: cust.acctype});
-
-    // if(acctype == null)
-    // {
-    //     response.message = 'Invalid selection';
-    //     return response;
-    // }
-
-    // var a = await Account.findOne({acctype: acctype._id, customer: c._id});
-
-    // if(a == null)
-    // {
-    //     response.message = 'Account not found';
-    //     return response;
-    // }
-
-
-    
-    //     const transaction = new Transaction({
-    //         narration: cust.transType + ": USSD Transaction - " + c.firstname + " " + c.surname,
-    //         amount: code.amount,
-    //         source: cust.channel,
-    //         section: cust.section,
-    //         tag: 'DM',
-    //         txRef: this.IDGenerator(),
-    //         status: cust.status
-    //     });
-
-    //     var transact = await transaction.save();
-
-
-    //     const posting = new Posting({
-    //         narration: cust.transType + ": USSD Transaction - " + c.firstname + " " + c.surname,
-    //         accno: a.accno,
-    //         accno2: acctype.accno,
-    //         amount: cust.amount,
-    //         transaction: transact._id,
-    //         transType: "DR",
-    //         acctype: agent.acctype,
-    //         postMode: "OP",
-    //         section: "Main"
-    //     });
-
-        
-
-    //     await posting.save();
-
-    //     const posting2 = new Posting({
-    //         narration: contra + ": USSD Transaction - " + c.firstname + " " + c.surname,
-    //         accno: agent.accno,
-    //         accno2: agent.accno,
-    //         amount: cust.amount,
-    //         transaction: transact._id,
-    //         transType: contra,
-    //         acctype: agent.acctype,
-    //         postMode: 'GL',
-    //         section: 'Contra'
-    //     });
-        
-
-    //     await posting2.save();
-
-    //     var updateOps = {availableBal: code.amount};
-
-    //     var updateOps2 = {availableBal: -code.amount};
-
-    //     //await Account.update({_id: a._id},{$set: updateOps});
-
-    //     await Account.findByIdAndUpdate({_id: a._id}, {$inc: updateOps });
-
-    //     await Ledger.findOneAndUpdate({accno: acctype.accno},{$inc: updateOps});
-
-    //     await Ledger.findOneAndUpdate({accno: agent.accno},{$inc: updateOps2});
-
-    //     await Agent.findOneAndUpdate({accno: agent.accno},{$inc: updateOps2});
-
-    //     response.flag = true;
-    //     response.message = 'Deposit Transaction performed successfully';
-    //     response.payload = posting;
-
-    //     console.log(response);
-        
-    
-    
-
-    // return response;
-
-    var response = {
-        flag: false,
-        message: 'Error signing up',
-        payload: null
-    };
-
-    
-
-  return new Promise(async(resolve, reject) => {
-    const airtime = new Airtime({
-        biller: cust.biller,
-        billerName: cust.billerName,
-        amount: cust.amount,
-        phoneno: cust.phoneno
-    });
-
-
-    
-
- airtime
-.save()
-.then(async(result) => {
-    console.log(result);
-    response.flag = true;
-    response.message = 'Airtime purchase performed successfully';
-    response.payload = result;
-
-    
-    resolve(response);
-})
-.catch(err => {
-    console.log(err)
-    reject(error);
-});
-        
-
-  
-  });
-
-}
 
 
 static IDGenerator() {
