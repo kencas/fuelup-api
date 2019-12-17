@@ -680,6 +680,8 @@ module.exports = class CustomerService{
 
         var amount = 1500;
 
+        console.log(cust);
+
 
         return new Promise(async(resolve, reject) => {
             
