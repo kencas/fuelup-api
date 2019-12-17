@@ -233,6 +233,8 @@ module.exports = class CustomerService{
 
             if(c != null)
             {
+                var wallet = await Wallet.findOne({customer: c._id});
+
                 isnewuser = false;
                 isconfiguredcode = c.isconfiguredcode;
                 cst = {
@@ -241,7 +243,10 @@ module.exports = class CustomerService{
                     phoneno: c.phoneno,
                     isconfiguredcode : c.isconfiguredcode,
                     email: c.email,
-                    code: cust.code
+                    code: cust.code,
+                    wallet: {
+                        balance: wallet.amount
+                    }
                 };
             }
 
