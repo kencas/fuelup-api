@@ -45,10 +45,7 @@ module.exports = class CustomerService{
         var response = {
             flag: false,
             message: 'Error Verification',
-            payload: {
-                code: '',
-                phoneno: ''
-            }
+            payload: {}
         };
 
         return new Promise(async(resolve, reject) => {
@@ -209,18 +206,7 @@ module.exports = class CustomerService{
             flag: false,
             message: 'Error Verification',
             isnewuser: false,
-            payload: {
-                username: 'N',
-                customerNo: 'N',
-                phoneno: 'N',
-                isconfiguredcode : 'N',
-                isconfiguredbvn : 'N',
-                email: 'N',
-                code: 'N',
-                wallet: {
-                    balance: 0.00
-                }
-            }
+            payload: {}
         };
 
         return new Promise(async(resolve, reject) => {
@@ -672,7 +658,7 @@ module.exports = class CustomerService{
         var response = {
             flag: false,
             message: 'You are not eligible for the loan',
-            payload: null
+            payload: []
         };
 
         var offers = [];

@@ -15,7 +15,7 @@ router.post('/startverification',(req, res, next) => {
     .catch(err => {
             
          console.log(err),
-        res.status(500).json(err);
+        res.status(200).json(err);
     });
 
 });
@@ -48,7 +48,7 @@ router.post('/verifypin',(req, res, next) => {
     .catch(err => {
             
          console.log(err),
-        res.status(500).json(err);
+        res.status(200).json(err);
     });
 
 });
@@ -66,7 +66,7 @@ router.post('/configurePin',(req, res, next) => {
     .catch(err => {
             
          console.log(err),
-        res.status(500).json(err);
+        res.status(200).json(err);
     });
 
 });
@@ -83,7 +83,7 @@ router.post('/signup',(req, res, next) => {
     .catch(err => {
             
          console.log(err),
-        res.status(500).json(err);
+        res.status(200).json(err);
     });
 
 });
@@ -99,7 +99,7 @@ router.post('/createOrder',(req, res, next) => {
     .catch(err => {
             
          console.log(err),
-        res.status(500).json(err);
+        res.status(200).json(err);
     });
 
 });
@@ -115,7 +115,7 @@ router.post('/initfunding',(req, res, next) => {
     .catch(err => {
             
          console.log(err),
-        res.status(500).json(err);
+        res.status(200).json(err);
     });
 
 });
@@ -131,7 +131,7 @@ router.post('/verifytransaction',(req, res, next) => {
     .catch(err => {
             
          console.log(err),
-        res.status(500).json(err);
+        res.status(200).json(err);
     });
 
 });
@@ -149,7 +149,7 @@ router.get('/orders',async(req, res, next) => {
       } 
       catch (err) 
       {
-        return res.status(500).send(err);
+        return res.status(200).send(err);
       }
 });
 
@@ -164,7 +164,7 @@ router.get('/transactions',async(req, res, next) => {
       } 
       catch (err) 
       {
-        return res.status(500).send(err);
+        return res.status(200).send(err);
       }
 });
 
@@ -180,7 +180,7 @@ router.get('/list',async(req, res, next) => {
       } 
       catch (err) 
       {
-        return res.status(500).send(err);
+        return res.status(200).send(err);
       }
 });
 
@@ -195,7 +195,7 @@ router.get('/',async(req, res, next) => {
       } 
       catch (err) 
       {
-        return res.status(500).send(err);
+        return res.status(200).send(err);
       }
 });
 
@@ -211,7 +211,7 @@ router.post('/',(req, res, next) => {
     .catch(err => {
             
          console.log(err),
-        res.status(500).json(err);
+        res.status(200).json(err);
     });
 
 });
@@ -227,7 +227,7 @@ router.post('/checkloaneligibility',(req, res, next) => {
     .catch(err => {
             
          console.log(err),
-        res.status(500).json(err);
+        res.status(200).json(err);
     });
 
 });
@@ -246,7 +246,7 @@ router.get('/:id', async(req, res, next) => {
     }
     catch (err) 
       {
-        return res.status(500).send(err);
+        return res.status(200).send(err);
       }
 });
 
@@ -262,7 +262,7 @@ router.get('/get/:id', async(req, res, next) => {
     }
     catch (err) 
       {
-        return res.status(500).send(err);
+        return res.status(200).send(err);
       }
 });
 
@@ -291,7 +291,7 @@ router.patch('/',(req, res, next) => {
     })
     .catch(err => {
         console.log(err),
-        res.status(500).json({
+        res.status(200).json({
             payload: err,
             message: "There is an error",
             flag: false
@@ -314,7 +314,7 @@ router.delete('/:id',(req, res, next) => {
     })
     .catch(err => {
         console.log(err),
-        res.status(500).json({
+        res.status(200).json({
             error: err,
             message: "Error occurred",
             flag: false,
