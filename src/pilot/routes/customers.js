@@ -199,10 +199,10 @@ router.post('/',(req, res, next) => {
 
 });
 
-router.post('/newaccount',(req, res, next) => {
+router.post('/checkloaneligibility',(req, res, next) => {
 
     
-    customerService.createOPAccount(req.body)
+    customerService.checkLoanEligibility(req.body)
     .then(result => {
         console.log(result),
         res.status(200).json(result);

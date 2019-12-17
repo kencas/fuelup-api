@@ -13,7 +13,9 @@ var CustomerSchema = new Schema(
         email  : {type: String, required: true, default: 'NA'},
         phoneno  : {type: String, required: true, default: 'NA'},
         transcode : {type: String, required: true, default: 'NA'},
+        bvn : {type: String, required: true, default: 'NA'},
         isconfiguredcode : {type: String, required: true, default: 'N'},
+        isconfiguredbvn : {type: String, required: true, default: 'N'},
         created : {type: Date, default: Date.now}
     }
 );

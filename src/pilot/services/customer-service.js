@@ -1,7 +1,7 @@
 const Customer = require('../model/customer');
 const Account  = require('../model/account');
 const AccType  = require('../model/acctype');
-const Posting  = require('../model/posting');
+const LoanOffer  = require('../model/loanoffer');
 const Transaction  = require('../model/transaction');
 const Order  = require('../model/order');
 const Ledger  = require('../model/ledger');
@@ -105,8 +105,47 @@ module.exports = class CustomerService{
             response.flag = true;
             response.message = 'Pin code configured successfully';
             response.payload = {
-                phoneno: verification.phoneno
+                username: customer.username,
+                email: customer.email,
+                customerNo: customer.customerNo,
+                phoneno: verification.phoneno,
+                isconfiguredbvn: customer.isconfiguredbvn
             };
+    
+                resolve(response);
+
+            });
+ 
+    }
+
+
+    static async verifypin(cust) {
+
+        var response = {
+            flag: false,
+            message: 'Error performing operation',
+            payload: null
+        };
+
+        return new Promise(async(resolve, reject) => {
+
+
+            var customer = await Customer.findOne({phoneno: cust.phoneno,transcode: cust.pincode});
+
+            
+            if(customer != null)
+            {
+                response.flag = true;
+                response.message = 'Pin code configured successfully';
+                response.payload = {
+                    phoneno: customer.phoneno,
+                    customerNo: customer.customerNo,
+                    email: customer.email,
+                    username: customer.username,
+                    isconfiguredbvn: customer.isconfiguredbvn
+                };
+            }
+           
     
                 resolve(response);
 
@@ -615,16 +654,51 @@ module.exports = class CustomerService{
       
     }
 
-    static async checkLoanEligibility()
+    static async checkLoanEligibility(cust)
     {
         var response = {
             flag: false,
-            message: 'You are ineligible forthe loan',
-            payload: {}
+            message: 'You are not ineligible for the loan',
+            payload: []
         };
+
+        var offers = [];
+
+        var amount = 1500;
 
 
         return new Promise(async(resolve, reject) => {
+            
+            var loanoffers = await LoanOffer.find({status: 'Approved'});
+            var customer = await Customer.findOne({phoneno: cust.phoneno});
+            var orders = await Order.find({customer: customer._id, isProcessed: 'Y'});
+
+
+            if(orders.length >= 1)
+            {
+                for(var i = 0; i < loanoffers.length; i++)
+                {
+                    offers.push({
+                        name: loanoffers[i].name,
+                        interest: loanoffers[i].interest,
+                        amount: (loanoffers[i].minApprovalAmt / 100) * amount,
+                        tenor: loanoffers[i].tenor
+                    });
+                }
+
+                response.flag = true;
+                response.message = 'You are eligible for the loan ';
+                response.payload = offers;
+
+                resolve(response);
+            }
+            else
+            reject(response);
+            
+
+
+
+
             
 
         });
