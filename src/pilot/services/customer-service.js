@@ -242,6 +242,7 @@ module.exports = class CustomerService{
                     customerNo: c.customerNo,
                     phoneno: c.phoneno,
                     isconfiguredcode : c.isconfiguredcode,
+                    isconfiguredbvn : c.isconfiguredbvn,
                     email: c.email,
                     code: cust.code,
                     wallet: {
