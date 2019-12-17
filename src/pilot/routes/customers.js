@@ -37,6 +37,23 @@ router.post('/verifyOTP',(req, res, next) => {
 });
 
 
+router.post('/verifypin',(req, res, next) => {
+
+    
+    customerService.verifypin(req.body)
+    .then(result => {
+        console.log(result),
+        res.status(200).json(result);
+    })
+    .catch(err => {
+            
+         console.log(err),
+        res.status(500).json(err);
+    });
+
+});
+
+
 
 router.post('/configurePin',(req, res, next) => {
 
