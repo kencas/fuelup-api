@@ -219,6 +219,7 @@ module.exports = class CustomerService{
                 response.message = 'Invalid Verification code';
 
                 reject(response);
+                return;
             }    
 
             verification.status = 'Used';
