@@ -672,7 +672,7 @@ module.exports = class CustomerService{
             
             var loanoffers = await LoanOffer.find({status: 'Approved'});
             var customer = await Customer.findOne({phoneno: cust.phoneno});
-            var orders = await Order.find({customer: customer._id, isProcessed: 'Y'});
+            var orders = await Order.find({customer: customer._id});
 
 
             if(orders.length >= 1)
