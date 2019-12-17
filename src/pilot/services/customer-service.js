@@ -109,7 +109,10 @@ module.exports = class CustomerService{
                 email: customer.email,
                 customerNo: customer.customerNo,
                 phoneno: verification.phoneno,
-                isconfiguredbvn: customer.isconfiguredbvn
+                isconfiguredbvn: customer.isconfiguredbvn,
+                wallet: {
+                    balance: customer.wallet.amount
+                }
             };
     
                 resolve(response);
@@ -130,19 +133,22 @@ module.exports = class CustomerService{
         return new Promise(async(resolve, reject) => {
 
 
-            var customer = await Customer.findOne({phoneno: cust.phoneno,transcode: cust.pincode});
+            var customer = await Customer.findOne({phoneno: cust.phoneno,transcode: cust.pincode}).populate('wallet');
 
             
             if(customer != null)
             {
                 response.flag = true;
-                response.message = 'Pin code configured successfully';
+                response.message = 'Pin code verified successfully';
                 response.payload = {
                     phoneno: customer.phoneno,
                     customerNo: customer.customerNo,
                     email: customer.email,
                     username: customer.username,
-                    isconfiguredbvn: customer.isconfiguredbvn
+                    isconfiguredbvn: customer.isconfiguredbvn,
+                    wallet: {
+                        balance: customer.wallet.amount
+                    }
                 };
             }
            
