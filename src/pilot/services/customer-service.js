@@ -45,7 +45,10 @@ module.exports = class CustomerService{
         var response = {
             flag: false,
             message: 'Error Verification',
-            payload: null
+            payload: {
+                code: '',
+                phoneno: ''
+            }
         };
 
         return new Promise(async(resolve, reject) => {
@@ -206,7 +209,18 @@ module.exports = class CustomerService{
             flag: false,
             message: 'Error Verification',
             isnewuser: false,
-            payload: {}
+            payload: {
+                username: 'N',
+                customerNo: 'N',
+                phoneno: 'N',
+                isconfiguredcode : 'N',
+                isconfiguredbvn : 'N',
+                email: 'N',
+                code: 'N',
+                wallet: {
+                    balance: 0.00
+                }
+            }
         };
 
         return new Promise(async(resolve, reject) => {
