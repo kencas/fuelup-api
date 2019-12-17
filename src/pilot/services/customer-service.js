@@ -133,9 +133,10 @@ module.exports = class CustomerService{
         return new Promise(async(resolve, reject) => {
 
 
-            var customer = await Customer.findOne({phoneno: cust.phoneno,transcode: cust.pincode}).populate('wallet');
+            var customer = await Customer.findOne({phoneno: cust.phoneno,transcode: cust.pincode});
 
-            
+            var wallet = await Wallet.findOne({customer: customer._id});
+
             if(customer != null)
             {
                 response.flag = true;
@@ -147,7 +148,7 @@ module.exports = class CustomerService{
                     username: customer.username,
                     isconfiguredbvn: customer.isconfiguredbvn,
                     wallet: {
-                        balance: customer.wallet.amount
+                        balance: wallet.amount
                     }
                 };
             }
