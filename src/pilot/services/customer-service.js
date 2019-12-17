@@ -504,6 +504,7 @@ module.exports = class CustomerService{
                     isOTPValidated: isOTPValidated,
                     isPaid: isPaid,
                     price: total,
+                    description: description,
                     refno: refno
                 });
     
