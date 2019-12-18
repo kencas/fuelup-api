@@ -15,6 +15,7 @@ var CustomerSchema = new Schema(
         phoneno  : {type: String, required: true, default: 'NA'},
         transcode : {type: String, required: true, default: 'NA'},
         bvn : {type: String, required: true, default: 'NA'},
+        pushToken : {type: String, required: true, default: 'NA'},
         image : {type: String, required: true, default: 'NA'},
         isconfiguredcode : {type: String, required: true, default: 'N'},
         isconfiguredbvn : {type: String, required: true, default: 'N'},
