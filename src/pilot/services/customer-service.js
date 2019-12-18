@@ -538,10 +538,11 @@ module.exports = class CustomerService{
 
             
 
-            response.flag = false;
+            response.flag = true;
             response.message = 'Order with reference no ' + refno + ' created successfully';
             response.payload = {
-                refno: refno
+                refno: refno,
+                balance: wallet.amount
             };
     
             resolve(response);
@@ -765,9 +766,11 @@ module.exports = class CustomerService{
 
     static async listTransaction(customerId) {
 
-        var wallet = await Wallet.findOne({customer: customerId});
+        var customer = await Customer.findOne({customerNo: customerId});
 
-        return await Transaction.findOne({wallet: wallet._id});
+        var wallet = await Wallet.findOne({customer: customer._id});
+
+        return await Transaction.find({wallet: wallet._id});
 
     
       
@@ -825,6 +828,18 @@ module.exports = class CustomerService{
         });
 
     }
+
+    // static async listTransaction(customerNo) {
+
+    //     var customer = await Customer.findOne({customerNo: customerNo});
+
+    //     var wallet = await Wallet.findOne({customer: customer._id});
+              
+    //     return await Transaction.find({wallet: wallet._id});
+      
+        
+      
+    //   }
 
 
 static IDGenerator() {
