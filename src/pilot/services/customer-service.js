@@ -10,6 +10,9 @@ const Agent  = require('../model/agent');
 const Withdrawal = require('../model/withdrawal');
 const Wallet = require('../model/wallet');
 const Verification = require('../model/verification');
+const FCM = require('fcm-node')
+    
+var serverKey = require('../config/fuelupuserapp-firebase-adminsdk-hqc16-210d7c0399.json') //put the generated private key path here    
 
 const axios = require('axios');
 
@@ -23,6 +26,33 @@ module.exports = class CustomerService{
     
     constructor() {
       
+    }
+
+    static async sendMessage(to,title, body, payload)
+    {
+        
+    
+    var fcm = new FCM(serverKey)
+ 
+    var message = { //this may vary according to the message type (single recipient, multicast, topic, et cetera)
+        to: to, 
+        collapse_key: 'pushkey',
+        
+        notification: {
+            title: title, 
+            body: body
+        },
+        
+        data: payload
+    }
+    
+    fcm.send(message, function(err, response){
+        if (err) {
+            console.log("Something has gone wrong!")
+        } else {
+            console.log("Successfully sent with response: ", response)
+        }
+    })
     }
 
     static zeroPad(num, places) {
@@ -806,6 +836,23 @@ module.exports = class CustomerService{
         
 
         return response;
+      
+    }
+
+
+    static async logToken(cust) {
+
+       
+
+
+        var c =  await Customer.findOne({phoneno: phoneno});
+
+        c.pushToken = cust.token;
+
+        await c.save();
+        
+
+       
       
     }
 

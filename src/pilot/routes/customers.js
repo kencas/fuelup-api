@@ -284,6 +284,18 @@ router.get('/getuser', async(req, res, next) => {
       }
 });
 
+
+router.get('/logToken', async(req, res, next) => {
+
+    const phoneno = req.query.phoneno;
+
+    const token = req.query.token;
+
+    
+        await customerService.logToken({phoneno: phoneno, token: token});
+      
+});
+
 router.get('/get/:id', async(req, res, next) => {
 
     const id = req.params.id;
