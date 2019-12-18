@@ -554,7 +554,7 @@ module.exports = class CustomerService{
 
         var response = {
             flag: false,
-            message: 'Error signing up',
+            message: 'Error verifying transaction',
             payload: null
         };
 
@@ -636,7 +636,9 @@ module.exports = class CustomerService{
                 narration: "Wallet funding - " + refno,
                 txRef: refno,
                 section: "User",
-                tag: "DM"
+                tag: "DM",
+                status: "Active"
+                
             });
 
             await transaction.save();
@@ -721,10 +723,23 @@ module.exports = class CustomerService{
                 narration: "Fund Transfer - " + refno,
                 txRef: refno,
                 section: "User",
-                tag: "TU"
+                tag: "TU",
+                status: "Active"
             });
 
             await transaction.save();
+
+            const transaction2 = new Transaction({
+                wallet: wallet2._id,
+                amount: cust.amount,
+                narration: "Fund Received from " + c.username + " - " + refno,
+                txRef: refno,
+                section: "User",
+                tag: "RU",
+                status: "Active"
+            });
+
+            await transaction2.save();
 
 
             const transfer = new Transfer({

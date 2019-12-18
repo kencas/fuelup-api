@@ -135,7 +135,7 @@ static async acceptProcessOrder(cust) {
       await agent.save();
 
       order.agent = agent._id;
-      order.status = "Proccesed";
+      order.status = "Processed";
       order.isProcessed = 'Y';
       order.isAccepted = 'Y';
       order.isDelivered = 'Y';
@@ -147,17 +147,21 @@ static async acceptProcessOrder(cust) {
       const transaction = new Transaction({
         agent: agent._id,
         amount: amount,
-        narration: "Order processed - " + order.refno,
+        narration: "Order accepted and processed - " + order.refno,
         txRef: order.refno,
         section: "Agent",
-        tag: "PO"
+        tag: "PO",
+        status: "Active"
     });
 
     await transaction.save();
 
-      response.flag = false;
+      response.flag = true;
       response.message = 'Order with reference no ' + order.refno+ ' processed successfully';
-      
+      response.payload = {
+          refno: order.refno,
+          amount: amount
+      };
 
       resolve(response);
   });
