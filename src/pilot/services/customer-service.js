@@ -139,10 +139,13 @@ module.exports = class CustomerService{
 
             var customer = await Customer.findOne({phoneno: cust.phoneno,transcode: cust.pincode});
 
-            var wallet = await Wallet.findOne({customer: customer._id});
+            
 
             if(customer != null)
             {
+
+                var wallet = await Wallet.findOne({customer: customer._id});
+
                 response.flag = true;
                 response.message = 'Pin code verified successfully';
                 response.payload = {
@@ -155,10 +158,14 @@ module.exports = class CustomerService{
                         balance: wallet.amount
                     }
                 };
+
+                resolve(response);
             }
+            else
+                reject(response);
            
     
-                resolve(response);
+                
 
             });
  
