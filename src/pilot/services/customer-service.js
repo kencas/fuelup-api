@@ -50,9 +50,11 @@ module.exports = class CustomerService{
 
         return new Promise(async(resolve, reject) => {
 
+
+            var code = this.getRandomInt(1000, 9999 );
         
         const verification = new Verification({
-            code: this.getRandomInt(1000, 9999 ),
+            code: code,
             phoneno: cust.phoneno
         });
 
@@ -60,7 +62,7 @@ module.exports = class CustomerService{
             var v = await verification.save();        
 
             response.flag = true;
-            response.message = 'Verification code sent successfully';
+            response.message = 'Dear customer, your Verification code is ' + code;
             response.payload = v;
     
                 resolve(response);
@@ -633,6 +635,105 @@ module.exports = class CustomerService{
     }
 
 
+    static async transfermoney(cust) {
+
+        
+        var isNewAccount = false;
+
+        var response = {
+            flag: false,
+            message: 'Error performing transaction',
+            payload: null
+        };
+
+        
+
+        var refno = this.getRandomInt(10000000001,11111111111);
+
+        
+      return new Promise(async(resolve, reject) => {
+
+
+     
+    
+        var c = await Customer.findOne({phoneno: cust.fromId});
+
+        if(c == null)
+        {
+            response.message = "Invalid sender id";
+
+            reject(response);
+        }
+
+           
+        var c2 = await Customer.findOne({phoneno: cust.toId});
+
+        if(c2 == null)
+        {
+            response.message = "Invalid receipient id";
+
+            reject(response);
+        }
+            
+            var wallet = await Wallet.findOne({customer: c._id});
+
+            if(wallet.amount < cust.amount)
+            {
+                response.message = "Low balance to complete operation";
+    
+                reject(response);
+            }
+
+            wallet.amount -= cust.amount;
+
+            await wallet.save();
+
+
+            var wallet2 = await Wallet.findOne({customer: c2._id});
+
+            wallet2.amount += cust.amount;
+
+            await wallet2.save();
+
+            const transaction = new Transaction({
+                wallet: wallet._id,
+                amount: cust.amount,
+                narration: "Fund Transfer - " + refno,
+                txRef: refno,
+                section: "User",
+                tag: "TU"
+            });
+
+            await transaction.save();
+
+
+            const transfer = new Transfer({
+                fromId: c._id,
+                toId: c2._id,
+                amount: cust.amount,
+                narration: "Transfer to User - " + c2.username,
+                fromTag: "User",
+                toTag: "User",
+                status: "Approved"
+            });
+
+            await transfer.save();
+            
+            response.flag = true;
+            response.message = "Transaction completed successfully";
+            response.payload = {
+                reference: refno,
+                phoneno: cust.phoneno,
+                amount: cust.amount
+            };
+
+            resolve(response);
+
+        });
+
+    }
+
+
     static async listOrder(customerId) {
 
         
@@ -665,7 +766,7 @@ module.exports = class CustomerService{
 
         var amount = 1500;
 
-        console.log(cust);
+        //console.log(cust);
 
 
         return new Promise(async(resolve, reject) => {

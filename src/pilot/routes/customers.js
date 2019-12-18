@@ -136,6 +136,22 @@ router.post('/verifytransaction',(req, res, next) => {
 
 });
 
+router.post('/transfermoney',(req, res, next) => {
+
+    
+    customerService.transfermoney(req.body)
+    .then(result => {
+        console.log(result),
+        res.status(200).json(result);
+    })
+    .catch(err => {
+            
+         console.log(err),
+        res.status(200).json(err);
+    });
+
+});
+
 
 
 router.get('/orders',async(req, res, next) => {
