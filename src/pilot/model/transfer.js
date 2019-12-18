@@ -11,6 +11,7 @@ var TransferSchema = new Schema(
         amount: {type: Number, required: true, default: 0},
         fromTag: {type: String, required: true, default: "NA"},
         toTag: {type: String, required: true, default: "NA"},
+        isOTPValidated : {type: String, required: true, default: "N"},
         status: {type: String, required: true, default: "Approved"},
         created : {type: Date, default: Date.now}
     }
