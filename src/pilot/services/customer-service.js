@@ -638,7 +638,8 @@ module.exports = class CustomerService{
             response.payload = {
                 reference: refno,
                 phoneno: phoneno,
-                amount: amount
+                amount: amount,
+                balance: balance
             };
 
             return response;
