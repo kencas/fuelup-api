@@ -99,7 +99,7 @@ module.exports = class CustomerService{
 
             var customer = await Customer.findOne({phoneno: verification.phoneno});
 
-            customer.transcode =cust.pincode;
+            customer.transcode = cust.pincode;
             customer.isconfiguredcode = 'Y';
 
             customer.save();

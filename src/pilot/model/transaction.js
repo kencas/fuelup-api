@@ -14,7 +14,7 @@ var TransactionSchema = new Schema(
         section: {type: String, required: true, default: "User"},
         tag: {type: String, required: true, default: "DM"},
         status: {type: String, required: true, default: "Pending"},
-        created : {type: Date, default: Date.now}
+        created : {type: Date, default: Date.now()}
     }
 );
 
