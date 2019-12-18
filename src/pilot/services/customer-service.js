@@ -768,6 +768,30 @@ module.exports = class CustomerService{
 
     }
 
+    static async getUser(phoneno) {
+
+        var response = {
+            flag: false,
+            message: 'User not found',
+            payload: null
+        };
+
+
+        var c =  await Customer.findOne({phoneno: phoneno}).select('username phoneno customerNo');
+
+        if( c != null)
+        {
+            response.flag = true;
+            response.payload = c;
+        }
+        
+
+        return response;
+      
+    }
+
+
+
 
     static async listOrder(customerId) {
 

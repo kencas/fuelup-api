@@ -186,6 +186,23 @@ router.get('/transactions',async(req, res, next) => {
 });
 
 
+router.get('/getuser',async(req, res, next) => {
+    
+    try
+    {
+        let customer;
+
+        customer = await customerService.getUser(req.query.phoneno);
+        
+        res.status(200).json(customer);
+      } 
+      catch (err) 
+      {
+        return res.status(200).send(err);
+      }
+});
+
+
 router.get('/list',async(req, res, next) => {
     
     try
