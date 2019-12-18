@@ -770,7 +770,7 @@ module.exports = class CustomerService{
 
         var wallet = await Wallet.findOne({customer: customer._id});
 
-        return await Transaction.find({wallet: wallet._id});
+        return await Transaction.find({wallet: wallet._id}).select('amount source txRef narration section tag status created _id');
 
     
       
