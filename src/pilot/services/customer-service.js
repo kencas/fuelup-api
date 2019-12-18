@@ -676,7 +676,22 @@ module.exports = class CustomerService{
       return new Promise(async(resolve, reject) => {
 
 
-     
+        if(cust.validateOTP == 'Y')
+            {
+                var customer = await Customer.findOne({phoneno: cust.fromId, transcode: cust.otp, isconfiguredcode: "Y"});
+
+                if(customer == null)
+                {
+                    response.flag = false;
+                    response.message = 'OTP Validation failed';
+
+                    reject(response);
+
+                    return;
+                }    
+
+                isOTPValidated = "Y";
+            }
     
         var c = await Customer.findOne({phoneno: cust.fromId});
 
@@ -724,6 +739,8 @@ module.exports = class CustomerService{
                 txRef: refno,
                 section: "User",
                 tag: "TU",
+                isOTPValidated: isOTPValidated,
+                refno: refno,
                 status: "Active"
             });
 
@@ -759,7 +776,8 @@ module.exports = class CustomerService{
             response.payload = {
                 reference: refno,
                 phoneno: cust.phoneno,
-                amount: cust.amount
+                amount: cust.amount,
+                balance: wallet.amount
             };
 
             resolve(response);
