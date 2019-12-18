@@ -99,6 +99,8 @@ module.exports = class CustomerService{
 
             var customer = await (await Customer.findOne({phoneno: verification.phoneno})).populate('wallet');
 
+            var wallet = await Wallet.findOne({customer: customer._id});
+
             customer.transcode = cust.pincode;
             customer.isconfiguredcode = 'Y';
 
@@ -113,7 +115,7 @@ module.exports = class CustomerService{
                 phoneno: verification.phoneno,
                 isconfiguredbvn: customer.isconfiguredbvn,
                 wallet: {
-                    balance: customer.wallet.amount
+                    balance: wallet.amount
                 }
             };
     
