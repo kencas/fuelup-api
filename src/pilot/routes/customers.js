@@ -268,13 +268,13 @@ router.post('/checkloaneligibility',(req, res, next) => {
 
 
 
-router.get('/:id', async(req, res, next) => {
+router.get('/getuser', async(req, res, next) => {
 
-    const id = req.params.id;
+    const id = req.query.phoneno;
 
     try
     {
-        let customer = await customerService.get(id);
+        let customer = await customerService.getUser(id);
        
         res.status(200).json(customer);
     }
