@@ -62,7 +62,7 @@ module.exports = class CustomerService{
             var v = await verification.save();        
 
             response.flag = true;
-            response.message = 'Dear customer, your Verification code is ' + code;
+            response.message = 'Verification code is ' + code;
             response.payload = v;
     
                 resolve(response);
