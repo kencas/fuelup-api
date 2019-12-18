@@ -176,6 +176,7 @@ router.get('/transactions',async(req, res, next) => {
         let transactions;
 
         transactions = await customerService.listTransaction(req.query.customerId);
+        console.log(transactions);
         res.status(200).json(transactions);
       } 
       catch (err) 
