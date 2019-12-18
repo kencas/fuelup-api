@@ -799,6 +799,7 @@ module.exports = class CustomerService{
 
         if( c != null)
         {
+            response.message = 'User found';
             response.flag = true;
             response.payload = c;
         }
