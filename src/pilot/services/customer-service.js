@@ -130,7 +130,7 @@ module.exports = class CustomerService{
 
         var response = {
             flag: false,
-            message: 'Error performing operation',
+            message: 'Pin verification failed',
             payload: null
         };
 
