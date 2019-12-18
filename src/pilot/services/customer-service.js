@@ -359,7 +359,12 @@ module.exports = class CustomerService{
 
             response.flag = true;
             response.message = 'Account created successfully';
-            response.payload = c;
+            response.payload = {
+                username: cust.username,
+                email: cust.email,
+                customerNo: customerno,
+                phoneno: cust.phoneno
+            };
 
             console.log(response);
             resolve(response);
