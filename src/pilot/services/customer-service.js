@@ -97,7 +97,7 @@ module.exports = class CustomerService{
 
             }
 
-            var customer = await Customer.findOne({phoneno: verification.phoneno});
+            var customer = await (await Customer.findOne({phoneno: verification.phoneno})).populate('wallet');
 
             customer.transcode = cust.pincode;
             customer.isconfiguredcode = 'Y';
