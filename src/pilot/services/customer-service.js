@@ -614,7 +614,11 @@ module.exports = class CustomerService{
 
             var wallet = await Wallet.findOne({customer: cd._id});
 
-            wallet.amount += amount;
+            var balance = Number(wallet.amount)
+
+            balance += Number(amount);
+
+            wallet.amount = balance;
 
             await wallet.save();
 
