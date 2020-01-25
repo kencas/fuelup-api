@@ -33,7 +33,6 @@ module.exports = class CustomerService{
     }
 
     static async list() {
-
       
        
         return await Customer.find();
