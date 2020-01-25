@@ -494,6 +494,63 @@ module.exports = class CustomerService{
  
     }
 
+    static async login(cust) {
+
+        var response = {
+            flag: false,
+            message: 'Error Verification',
+            isnewuser: false,
+            payload: {}
+        };
+
+        return new Promise(async(resolve, reject) => {
+        
+            var customer = await Customer.findOne({phoneno: cust.phoneno, password: cust.password});
+
+            if(customer == null)
+            {
+                response.flag = false;
+                response.message = 'Invalid user';
+
+                reject(response);
+                return;
+            }    
+
+            
+
+            var isnewuser = true;
+            var isconfiguredcode = 'N';
+            var cst = {};
+
+            if(customer != null)
+            {
+                var wallet = await Wallet.findOne({customer: customer._id});
+
+                
+                isconfiguredcode = customer.isconfiguredcode;
+                cst = {
+                    username: customer.username,
+                    customerNo: customer.customerNo,
+                    phoneno: customer.phoneno,
+                    isconfiguredcode : customer.isconfiguredcode,
+                    isconfiguredbvn : customer.isconfiguredbvn,
+                    email: customer.email,
+                   wallet: {
+                        balance: wallet.amount
+                    }
+                };
+            }
+
+            response.flag = true;
+            response.message = 'Phone Number verified successfully';
+            response.isnewuser = isnewuser;
+            response.payload = cst;
+    
+            resolve(response);
+        });
+ 
+    }
+
     
     static create(cust) {
 

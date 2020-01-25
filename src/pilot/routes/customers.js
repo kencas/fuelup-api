@@ -168,6 +168,22 @@ router.post('/register',(req, res, next) => {
 
 });
 
+router.post('/login',(req, res, next) => {
+
+    
+    customerService.login(req.body)
+    .then(result => {
+        console.log(result),
+        res.status(200).json(result);
+    })
+    .catch(err => {
+            
+         console.log(err),
+        res.status(200).json(err);
+    });
+
+});
+
 router.post('/createOrder',(req, res, next) => {
 
     
