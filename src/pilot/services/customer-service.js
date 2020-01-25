@@ -708,7 +708,8 @@ module.exports = class CustomerService{
                 email: cust.email,
                 phoneno: cust.phoneno,
                 customerNo: customerno,
-                countrycode: cust.countrycode
+                countrycode: cust.countrycode,
+                password: cust.password
             });
             
             var c = await customer.save();

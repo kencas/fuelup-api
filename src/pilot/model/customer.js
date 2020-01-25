@@ -20,6 +20,7 @@ var CustomerSchema = new Schema(
         phoneno  : {type: String, required: true, default: 'NA'},
         countrycode : {type: String, required: true, default: 'NA'},
         transcode : {type: String, required: true, default: 'NA'},
+        password : {type: String, required: true, default: 'NA'},
         bvn : {type: String, required: true, default: 'NA'},
         pushToken : {type: String, required: true, default: 'NA'},
         image : {type: String, required: true, default: 'NA'},
